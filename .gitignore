@@ -1,0 +1,7 @@
+.gradle
+.idea
+.vs
+cmake-build-debug
+Debug
+ipch
+*.db
