@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <functional>
 #include <vector>
 #include <memory>
 #include "type_base.h"
@@ -28,6 +29,9 @@ namespace compiler
 
 		bool is_type_token(const string &type);
 		bool is_pointer_token(const string &type);
+
+		AST parse_left_associativity_operator(function<AST()> inside, function<bool(string)> predicate);
+		AST parse_left_unary_operator(function<AST()> inside, function<bool(string)> predicate);
     public:
 		syntax_analyzer(program_ptr prog, vector<token> tokens);
 
@@ -61,6 +65,13 @@ namespace compiler
 		AST parse_unit7();
 		AST parse_unit8();
 		AST parse_unit9();
+		AST parse_unit10();
+		AST parse_unit11();
+		AST parse_unit12();
+		AST parse_unit13();
+		AST parse_unit14();
+		AST parse_unit15();
+		AST parse_unit16();
 
 		type_representation parse_type();
 		type_representation parse_pointer(type_representation base_type);

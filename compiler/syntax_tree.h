@@ -25,6 +25,7 @@ namespace compiler
         vector<AST> children;
 		type_representation type;
 		token t;
+		bool discard_result = false;
 
 		void add_children(AST tree);
     };

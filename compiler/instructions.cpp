@@ -53,7 +53,10 @@ void compiler::instructions::instruction_store::operate(function_environment & e
 	assert_cond(lhs.addr != nullptr);
 	memcpy(lhs.addr, rhs.value.get_raw_memory(), rhs.value.get_raw_memory_size());
 
-	env.stack->push(lhs);
+	operand_stack_element e(rhs.value, lhs.addr);
+	e.type = lhs.type;
+
+	env.stack->push(e);
 }
 
 void compiler::instructions::instruction_duplicate::operate(function_environment & env)
@@ -93,14 +96,9 @@ instruction_ptr get_instruction(compiler::type_base_ptr type, int index, bool is
 	throw new invalid_argument("Unrecognized type");
 }
 
-instruction_ptr compiler::instructions::get_instruction_load(compiler::type_base_ptr type, int index)
+instruction_ptr compiler::instructions::get_instruction_load(compiler::type_representation type, int index)
 {
-	return get_instruction(type, index, false);
-}
-
-instruction_ptr compiler::instructions::get_instruction_load_static(compiler::type_base_ptr type, int index)
-{
-	return get_instruction(type, index, true);
+	return get_instruction(type.base_type, index, type.is_static);
 }
 
 compiler::instructions::instruction_reference::instruction_reference(compiler::type_representation type)

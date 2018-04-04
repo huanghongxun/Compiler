@@ -7,6 +7,7 @@
 #include "parsers.h"
 #include "unit_assert.h"
 #include "type_primitive.h"
+#include "utility.h"
 #include "type_pointer.h"
 
 using namespace std;
@@ -60,7 +61,7 @@ compiler::AST compiler::syntax_analyzer::parse_define_vars(bool force_static)
 	if (child->desc.type() == typeid(descriptor_function))
 		return child;
 
-	AST ast = make_shared<syntax_tree>(descriptor_define_local_variables(), type_token);
+	AST ast = make_shared<syntax_tree>(descriptor_define_local_variables(type.is_static), type_token);
 	ast->children.push_back(child);
 
 	while (peek_token() != ";") {
@@ -139,7 +140,7 @@ compiler::AST compiler::syntax_analyzer::parse_define_var(const type_representat
 		if (peek_token("="))
 		{
 			assert_next_token("=");
-			ast->add_children(parse_expression());
+			ast->add_children(parse_unit16());
 		}
 		return ast;
 	}
@@ -190,16 +191,7 @@ compiler::AST compiler::syntax_analyzer::parse_packed_statements()
 
 compiler::AST compiler::syntax_analyzer::parse_expression()
 {
-	AST ast = parse_unit9();
-	while (peek_token("<<") || peek_token(">>"))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit9());
-		ast = n_ast;
-	}
-	return ast;
+	return parse_left_associativity_operator([this]() { return parse_unit16(); }, is_any_of<string>(","));
 }
 
 compiler::AST compiler::syntax_analyzer::parse_unit0()
@@ -211,9 +203,72 @@ compiler::AST compiler::syntax_analyzer::parse_unit0()
 	{
 		return make_shared<syntax_tree>(descriptor_constant(name), name_token);
 	}
+	else if (is_name(name))
+	{
+		if (peek_token("(")) // function call
+		{
+			assert_next_token("(");
+			AST ast = make_shared<syntax_tree>(descriptor_func_call(name), name_token);
+			if (!peek_token(")"))
+			{
+				while (true)
+				{
+					ast->add_children(parse_unit16());
+					if (peek_token(","))
+						assert_next_token(",");
+					else // )
+						break;
+				}
+			}
+			assert_next_token(")");
+			return ast;
+		}
+		else if (peek_token("--") || peek_token("++")) // a++, a--
+		{
+
+		}
+		else // variable
+		{
+			AST ast = make_shared<syntax_tree>(descriptor_var(name), name_token);
+			while (peek_token("[")) {
+				assert_next_token("[");
+				ast->children.push_back(parse_expression());
+				assert_next_token("]");
+			}
+			return ast;
+		}
+	}
+	else
+	{
+		AST ast = parse_expression();
+		assert_next_token(")");
+		return ast;
+	}
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit1()
+{
+	return parse_unit0();
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit2()
+{
+	token name_token = peek_token_with_code_info();
+	string name = name_token.code;
+
+	if (types.count(name)) // functional cast
+	{
+		auto type = parse_type(); // C++ does not allow functional pointer cast.
+		assert_next_token("(");
+		AST ast = make_shared<syntax_tree>(descriptor_primitive_cast(type), name_token);
+		ast->children.push_back(parse_expression());
+		assert_next_token(")");
+		return ast;
+	}
 	else if (name == "sizeof")
 	{
 		AST ast;
+		assert_next_token("sizeof");
 		assert_next_token("(");
 		if (is_type_token(peek_token()))
 			ast = make_shared<syntax_tree>(descriptor_constant(to_string(parse_pointer(parse_type()).base_type->size())), name_token);
@@ -226,169 +281,94 @@ compiler::AST compiler::syntax_analyzer::parse_unit0()
 
 		return ast;
 	}
-	else if (is_name(name))
-	{
-		if (peek_token("("))
-		{
-			assert_next_token("(");
-			AST ast = make_shared<syntax_tree>(descriptor_func_call(name), name_token);
-			if (!peek_token(")"))
-			{
-				while (true)
-				{
-					ast->add_children(parse_expression());
-					if (peek_token(","))
-						assert_next_token(",");
-					else // )
-						break;
-				}
-			}
-			assert_next_token(")");
-			return ast;
-		}
-		else
-		{
-			AST ast = make_shared<syntax_tree>(descriptor_var(name), name_token);
-			while (peek_token("[")) {
-				assert_next_token("[");
-				ast->children.push_back(parse_expression());
-				assert_next_token("]");
-			}
-			return ast;
-		}
-
-	}
-	else
-	{
-		AST ast = parse_expression();
-		assert_next_token(")");
-		return ast;
-	}
+	else return parse_unit1();
 }
 
-compiler::AST compiler::syntax_analyzer::parse_unit1()
+compiler::AST compiler::syntax_analyzer::parse_unit3()
 {
-	if (peek_token("+") || peek_token("-") || peek_token("!") || peek_token("~") || peek_token("*") || peek_token("&"))
+	if (is_any_of<string>("++", "--", "+", "-", "!", "~", "*", "&")(peek_token()))
 	{
 		auto t = next_token();
 		AST ast = make_shared<syntax_tree>(descriptor_unary_operator(t.code), t);
-		ast->children.push_back(parse_unit1());
+		ast->children.push_back(parse_unit3());
 		return ast;
 	}
-	else if (peek_token(0) == "(" && is_type_token(peek_token(1)))
+	else if (peek_token(0) == "(" && is_type_token(peek_token(1))) // C-style cast
 	{
 		auto t = peek_token_with_code_info();
 		assert_next_token("(");
 		auto type = parse_pointer(parse_type());
 		assert_next_token(")");
 		AST ast = make_shared<syntax_tree>(descriptor_primitive_cast(type), t);
-		ast->children.push_back(parse_unit1());
+		ast->children.push_back(parse_unit3());
 		return ast;
 	}
-	else return parse_unit0();
-}
-
-compiler::AST compiler::syntax_analyzer::parse_unit2()
-{
-	AST ast = parse_unit1();
-	while (peek_token("*") || peek_token("/") || peek_token("%"))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit1());
-		ast = n_ast;
-	}
-	return ast;
-}
-
-compiler::AST compiler::syntax_analyzer::parse_unit3()
-{
-	AST ast = parse_unit2();
-	while (peek_token("+") || peek_token("-"))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit2());
-		ast = n_ast;
-	}
-	return ast;
+	else return parse_unit2();
 }
 
 compiler::AST compiler::syntax_analyzer::parse_unit4()
 {
-	AST ast = parse_unit3();
-	while (peek_token("<") || peek_token("<=") || peek_token(">") || peek_token(">="))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit3());
-		ast = n_ast;
-	}
-	return ast;
+	return parse_unit3();
 }
 
 compiler::AST compiler::syntax_analyzer::parse_unit5()
 {
-	AST ast = parse_unit4();
-	while (peek_token("==") || peek_token("!="))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit4());
-		ast = n_ast;
-	}
-	return ast;
+	return parse_left_associativity_operator([this]() { return parse_unit4(); }, is_any_of<string>("*", "/", "%"));
 }
 
 compiler::AST compiler::syntax_analyzer::parse_unit6()
 {
-	AST ast = parse_unit5();
-	while (peek_token("^"))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit5());
-		ast = n_ast;
-	}
-	return ast;
+	return parse_left_associativity_operator([this]() { return parse_unit5(); }, is_any_of<string>("+", "-"));
 }
 
 compiler::AST compiler::syntax_analyzer::parse_unit7()
 {
-	AST ast = parse_unit6();
-	while (peek_token("&&"))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit6());
-		ast = n_ast;
-	}
-	return ast;
+	return parse_left_associativity_operator([this]() { return parse_unit6(); }, is_any_of<string>("<<", ">>"));
 }
 
 compiler::AST compiler::syntax_analyzer::parse_unit8()
 {
-	AST ast = parse_unit7();
-	while (peek_token("||"))
-	{
-		auto t = next_token();
-		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
-		n_ast->children.push_back(ast);
-		n_ast->children.push_back(parse_unit7());
-		ast = n_ast;
-	}
-	return ast;
+	return parse_unit7();
 }
 
 compiler::AST compiler::syntax_analyzer::parse_unit9()
 {
-	AST left = parse_unit8();
+	return parse_left_associativity_operator([this]() { return parse_unit8(); }, is_any_of<string>("<", "<=", ">", ">="));
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit10()
+{
+	return parse_left_associativity_operator([this]() { return parse_unit9(); }, is_any_of<string>("==", "!="));
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit11()
+{
+	return parse_left_associativity_operator([this]() { return parse_unit10(); }, is_any_of<string>("&"));
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit12()
+{
+	return parse_left_associativity_operator([this]() { return parse_unit11(); }, is_any_of<string>("^"));
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit13()
+{
+	return parse_left_associativity_operator([this]() { return parse_unit12(); }, is_any_of<string>("|"));
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit14()
+{
+	return parse_left_associativity_operator([this]() { return parse_unit13(); }, is_any_of<string>("&&"));
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit15()
+{
+	return parse_left_associativity_operator([this]() { return parse_unit14(); }, is_any_of<string>("||"));
+}
+
+compiler::AST compiler::syntax_analyzer::parse_unit16()
+{
+	AST left = parse_unit15();
 
 	if (peek_token("=") || peek_token("+=") || peek_token("-=") || peek_token("/=") || peek_token("%=") || peek_token("*=") || peek_token("|=") || peek_token("&=") || peek_token("^=") || peek_token("<<=") || peek_token(">>="))
 	{
@@ -478,6 +458,33 @@ bool compiler::syntax_analyzer::is_type_token(const string & type)
 bool compiler::syntax_analyzer::is_pointer_token(const string & type)
 {
 	return type == "const" || type == "*";
+}
+
+inline compiler::AST compiler::syntax_analyzer::parse_left_associativity_operator(function<AST()> inside, function<bool(std::string)> predicate)
+{
+	AST ast = inside();
+	while (predicate(peek_token()))
+	{
+		auto t = next_token();
+		AST n_ast = make_shared<syntax_tree>(descriptor_binary_operator(t.code), t);
+		n_ast->children.push_back(ast);
+		n_ast->children.push_back(inside());
+		ast = n_ast;
+	}
+	return ast;
+}
+
+compiler::AST compiler::syntax_analyzer::parse_left_unary_operator(function<AST()> inside, function<bool(string)> predicate)
+{
+	if (predicate(peek_token()))
+	{
+		auto t = next_token();
+		AST ast = make_shared<syntax_tree>(descriptor_unary_operator(t.code), t);
+		ast->children.push_back(parse_left_unary_operator(inside, predicate));
+		return ast;
+	}
+	else
+		return inside();
 }
 
 compiler::syntax_analyzer::syntax_analyzer(program_ptr prog, vector<token> tokens)

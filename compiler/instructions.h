@@ -326,9 +326,7 @@ namespace compiler::instructions
 		void operate(function_environment& env) override;
 	};
 
-	instruction_ptr get_instruction_load(compiler::type_base_ptr type, int index);
-
-	instruction_ptr get_instruction_load_static(compiler::type_base_ptr type, int index);
+	instruction_ptr get_instruction_load(compiler::type_representation type, int index);
 
 	struct instruction_invoke : public instruction
 	{

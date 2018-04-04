@@ -56,3 +56,8 @@ compiler::syntax::descriptor_assign::descriptor_assign(const string & op)
 	: op(op)
 {
 }
+
+compiler::syntax::descriptor_define_local_variables::descriptor_define_local_variables(bool is_static)
+	: is_static(is_static)
+{
+}

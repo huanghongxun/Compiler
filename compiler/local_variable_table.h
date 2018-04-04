@@ -38,7 +38,7 @@ namespace compiler
 			return reinterpret_cast<T*>(reinterpret_cast<char*>(pool.get()) + index);
 		}
 
-
+		void reset();
 		
 	};
 }

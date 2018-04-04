@@ -3,11 +3,13 @@
 #include "syntax_descriptors.h"
 #include "instructions.h"
 #include "bytecode_function_generator.h"
+#include "bytecode_init_generator.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <any>
 #include "unit_assert.h"
+#include "variable_layer.h"
 #include "string_utils.h"
 #include "type_primitive.h"
 
@@ -53,38 +55,50 @@ program_ptr compiler::bytecode_generator::get_program()
 	return prog;
 }
 
+void compiler::bytecode_generator::build_static_vars(AST ast, AST init)
+{
+	if (ast->desc.type() == typeid(descriptor_define_local_variables))
+	{
+		auto desc = any_cast<descriptor_define_local_variables>(ast->desc);
+		if (desc.is_static)
+			init->add_children(ast);
+	}
+	else
+		for (auto &i : ast->children)
+			build_static_vars(i, init);
+}
+
+void mark_global_variable_definition(AST ast)
+{
+	for (auto &i : ast->children)
+	{
+		if (i->desc.type() == typeid(descriptor_define_local_variables))
+		{
+			auto desc = any_cast<descriptor_define_local_variables>(i->desc);
+			desc.is_global = true;
+			i->desc = desc;
+		}
+	}
+}
+
 bytecode compiler::bytecode_generator::build(AST ast)
 {
-	AST initializer = make_shared<syntax_tree>(descriptor_function(type_representation{ type_void, false, false }, "__init__"), token());
-	AST initializer_statements = make_shared<syntax_tree>(descriptor_statements(), token());
-	initializer_statements->children.insert(initializer_statements->children.end(), ast->children.begin(), ast->children.end());
-	initializer->add_children(initializer_statements);
-	bytecode_function_generator init_generator(this);
-	init_generator.set_global();
+	AST initializer = make_shared<syntax_tree>(descriptor(), token());
+	mark_global_variable_definition(ast);
+	build_static_vars(ast, initializer);
+	bytecode_init_generator init_generator(this);
 	funcs["__init__"] = init_generator.build(initializer);
-
-	auto global = init_generator.get_variables().back();
 
 	for (auto &i : ast->children)
 	{
 		if (i->desc.type() == typeid(descriptor_function))
-			build_func(i, &global);
+			build_func(i, init_generator.get_global_variables());
 		else if (i->desc.type() != typeid(descriptor_define_local_variables))
 			throw runtime_error("unrecognized descriptor");
 	}
 
-	return bytecode(move(constant_string_pool), funcs, global.ptr);
+	return bytecode(move(constant_string_pool), funcs, init_generator.get_global_variables()->ptr);
 }
-
-void compiler::bytecode_generator::build_func(AST ast)
-{
-	auto desc = any_cast<descriptor_function>(ast->desc);
-
-	auto func = bytecode_function_generator(this).build(ast);
-	if (func != nullptr)
-		funcs[desc.name] = func;
-}
-
 
 void compiler::bytecode_generator::build_func(AST ast, variables_layer *layer)
 {

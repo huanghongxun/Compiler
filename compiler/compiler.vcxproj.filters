@@ -135,6 +135,12 @@
     <ClInclude Include="syntax_tree_evaluation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="variable_layer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bytecode_init_generator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -203,9 +209,6 @@
     <ClCompile Include="bytecode_generators.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bytecode_appender.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="function_environment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -240,6 +243,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="syntax_tree_evaluation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="assign_cast.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="variable_layer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bytecode_init_generator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

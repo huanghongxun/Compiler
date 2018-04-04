@@ -12,6 +12,63 @@ using namespace compiler;
 using namespace compiler::syntax;
 using namespace compiler::instructions;
 
+void discard_if(AST ast, bytecode_appender &appender)
+{
+	if (ast->discard_result && !ast->type.base_type->is_void())
+		appender.append(instruction_ptr(new instruction_pop()));
+}
+
+template<typename T>
+bool build_assign_common(const string &op, bytecode_appender &appender)
+{
+	if (op == "*=")
+		appender.append(instruction_ptr(new instruction_mul<T>()));
+	else if (op == "+=")
+		appender.append(instruction_ptr(new instruction_add<T>()));
+	else if (op == "-=")
+		appender.append(instruction_ptr(new instruction_sub<T>()));
+	else if (op == "/=")
+		appender.append(instruction_ptr(new instruction_div<T>()));
+	else
+		return false;
+	return true;
+}
+
+template<typename T>
+bool build_assign_integral(const string &op, bytecode_appender &appender)
+{
+	if (build_assign_common<T>(op, appender))
+		return true;
+	else if (op == "&=")
+		appender.append(instruction_ptr(new instruction_and<T>()));
+	else if (op == "|=")
+		appender.append(instruction_ptr(new instruction_or<T>()));
+	else if (op == "^=")
+		appender.append(instruction_ptr(new instruction_xor<T>()));
+	else if (op == "<<=")
+		appender.append(instruction_ptr(new instruction_shl<T>()));
+	else if (op == ">>=")
+		appender.append(instruction_ptr(new instruction_shr<T>()));
+	else if (op == "%=")
+		appender.append(instruction_ptr(new instruction_rem<T>()));
+	else
+		return false;
+	return true;
+}
+
+bool build_assign_bool(const string &op, bytecode_appender &appender)
+{
+	if (op == "^=")
+		appender.append(instruction_ptr(new instruction_xor<bool>()));
+	else if (op == "|=")
+		appender.append(instruction_ptr(new instruction_or<bool>()));
+	else if (op == "&=")
+		appender.append(instruction_ptr(new instruction_and<bool>()));
+	else
+		return false;
+	return true;
+}
+
 void compiler::bytecode_assign::build(bytecode_appender & appender, AST ast)
 {
 	auto desc = any_cast<descriptor_assign>(ast->desc);
@@ -23,30 +80,33 @@ void compiler::bytecode_assign::build(bytecode_appender & appender, AST ast)
 		appender.append(instruction_ptr(new instruction_duplicate()));
 	appender.build_expression(ast->children[1]);
 
-	if (desc.op == "=");
-	else if (desc.op == "*=")
-		appender.append(instruction_ptr(new instruction_mul<int>()));
-	else if (desc.op == "+=")
-		appender.append(instruction_ptr(new instruction_add<int>()));
-	else if (desc.op == "-=")
-		appender.append(instruction_ptr(new instruction_sub<int>()));
-	else if (desc.op == "/=")
-		appender.append(instruction_ptr(new instruction_div<int>()));
-	else if (desc.op == "<<=")
-		appender.append(instruction_ptr(new instruction_shl<int>()));
-	else if (desc.op == ">>=")
-		appender.append(instruction_ptr(new instruction_shr<int>()));
-	else if (desc.op == "^=")
-		appender.append(instruction_ptr(new instruction_xor<int>()));
-	else if (desc.op == "|=")
-		appender.append(instruction_ptr(new instruction_or<int>()));
-	else if (desc.op == "&=")
-		appender.append(instruction_ptr(new instruction_and<int>()));
-	else if (desc.op == "%=")
-		appender.append(instruction_ptr(new instruction_rem<int>()));
-	else
-		throw runtime_error(string_format("Unexpected assign operator %s", desc.op.c_str()));
+	auto type_name = ast->children[0]->type.base_type->id;
+	assert_eq(ast->children[0]->type.base_type->id, ast->children[1]->type.base_type->id);
 
+	if (desc.op != "=")
+	{
+		bool flag = false;
+
+		if (type_name == type_int->id)
+			flag = build_assign_integral<int>(desc.op, appender);
+		else if (type_name == type_short->id)
+			flag = build_assign_integral<short>(desc.op, appender);
+		else if (type_name == type_long->id)
+			flag = build_assign_integral<long>(desc.op, appender);
+		else if (type_name == type_long_long->id)
+			flag = build_assign_integral<long long>(desc.op, appender);
+		else if (type_name == type_float->id)
+			flag = build_assign_common<float>(desc.op, appender);
+		else if (type_name == type_double->id)
+			flag = build_assign_common<double>(desc.op, appender);
+		else if (type_name == type_long_double->id)
+			flag = build_assign_common<long double>(desc.op, appender);
+		else if (type_name == type_bool->id)
+			flag = build_assign_bool(desc.op, appender);
+
+		if (!flag)
+			throw runtime_error(string_format("Unexpected assign operator %s", desc.op.c_str()));
+	}
 	appender.append(instruction_ptr(new instruction_store()));
 }
 
@@ -127,44 +187,53 @@ void compiler::bytecode_binary_operator::build(bytecode_appender &appender, AST 
 
 	assert_eq(ast->children.size(), 2);
 
-	appender.build_expression(ast->children[0]);
-	appender.build_expression(ast->children[1]);
-
-	auto type_name = ast->children[0]->type.base_type->id;
-	if (ast->children[0]->type.base_type->is_pointer() ||
-		ast->children[0]->type.base_type->is_array())
+	if (desc.op == ",")
 	{
-		assert_cond(ast->children[1]->type.base_type->is_primitive());
-		auto type = dynamic_cast<type_primitive*>(ast->children[1]->type.base_type.get());
-		assert_cond(type->is_integral());
-		appender.append(instruction_ptr(new instruction_move(desc.op == "+")));
+		appender.build_expression(ast->children[0]);
+		discard_if(ast->children[0], appender);
+		appender.build_expression(ast->children[1]);
 	}
 	else
 	{
-		assert_eq(ast->children[0]->type.base_type->id, ast->children[1]->type.base_type->id);
+		appender.build_expression(ast->children[0]);
+		appender.build_expression(ast->children[1]);
 
-		bool flag;
-		if (type_name == type_int->id)
-			flag = build_binary_integral<int>(desc.op, appender);
-		else if (type_name == type_short->id)
-			flag = build_binary_integral<short>(desc.op, appender);
-		else if (type_name == type_long->id)
-			flag = build_binary_integral<long>(desc.op, appender);
-		else if (type_name == type_long_long->id)
-			flag = build_binary_integral<long long>(desc.op, appender);
-		else if (type_name == type_float->id)
-			flag = build_binary_common<float>(desc.op, appender);
-		else if (type_name == type_double->id)
-			flag = build_binary_common<double>(desc.op, appender);
-		else if (type_name == type_long_double->id)
-			flag = build_binary_common<long double>(desc.op, appender);
-		else if (type_name == type_bool->id)
-			flag = build_binary_bool(desc.op, appender);
+		auto type_name = ast->children[0]->type.base_type->id;
+		if (ast->children[0]->type.base_type->is_pointer() ||
+			ast->children[0]->type.base_type->is_array())
+		{
+			assert_cond(ast->children[1]->type.base_type->is_primitive());
+			auto type = dynamic_cast<type_primitive*>(ast->children[1]->type.base_type.get());
+			assert_cond(type->is_integral());
+			appender.append(instruction_ptr(new instruction_move(desc.op == "+")));
+		}
 		else
-			assert_cond(false); // Must be processed in semantic analyzer.
+		{
+			assert_eq(ast->children[0]->type.base_type->id, ast->children[1]->type.base_type->id);
 
-		if (!flag)
-			appender.get_program()->compilation_error(ast->t, "Type %s does not accept operator %s", type_name.c_str(), desc.op.c_str());
+			bool flag;
+			if (type_name == type_int->id)
+				flag = build_binary_integral<int>(desc.op, appender);
+			else if (type_name == type_short->id)
+				flag = build_binary_integral<short>(desc.op, appender);
+			else if (type_name == type_long->id)
+				flag = build_binary_integral<long>(desc.op, appender);
+			else if (type_name == type_long_long->id)
+				flag = build_binary_integral<long long>(desc.op, appender);
+			else if (type_name == type_float->id)
+				flag = build_binary_common<float>(desc.op, appender);
+			else if (type_name == type_double->id)
+				flag = build_binary_common<double>(desc.op, appender);
+			else if (type_name == type_long_double->id)
+				flag = build_binary_common<long double>(desc.op, appender);
+			else if (type_name == type_bool->id)
+				flag = build_binary_bool(desc.op, appender);
+			else
+				assert_cond(false); // Must be processed in semantic analyzer.
+
+			if (!flag)
+				appender.get_program()->compilation_error(ast->t, "Type %s does not accept operator %s", type_name.c_str(), desc.op.c_str());
+		}
 	}
 }
 
@@ -382,14 +451,14 @@ void compiler::bytecode_var::build(bytecode_appender & appender, AST ast)
 		if ((*it).variables.count(desc.name))
 		{
 			auto re = (*it).variables[desc.name];
-			appender.append(get_instruction_load(re.second.base_type, re.first));
+			appender.append(get_instruction_load(re.second, re.first));
 			return;
 		}
 
 	if (appender.get_global_variables()->variables.count(desc.name))
 	{
 		auto re = appender.get_global_variables()->variables[desc.name];
-		appender.append(get_instruction_load_static(re.second.base_type, re.first));
+		appender.append(get_instruction_load(re.second, re.first));
 		return;
 	}
 
@@ -401,11 +470,17 @@ void compiler::bytecode_if::build(bytecode_appender & appender, AST ast)
 	assert_cond(2 <= ast->children.size() && ast->children.size() <= 3);
 
 	appender.build_expression(ast->children[0]);
-	int if_exp = appender.append(instruction_ptr());
+	int if_exp = appender.append(instruction_ptr()), else_exp;
 	appender.build_statements(ast->children[1]);
-	appender.modify(if_exp, instruction_ptr(new instruction_if(appender.get_current_instruction_number())));
 	if (ast->children.size() == 3)
+		else_exp = appender.append(instruction_ptr());
+	appender.modify(if_exp, instruction_ptr(new instruction_if(appender.get_current_instruction_number())));
+
+	if (ast->children.size() == 3)
+	{
 		appender.build_statements(ast->children[2]);
+		appender.modify(else_exp, instruction_ptr(new instruction_jump(appender.get_current_instruction_number())));
+	}
 }
 
 void compiler::bytecode_while::build(bytecode_appender & appender, AST ast)

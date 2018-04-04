@@ -12,7 +12,13 @@ namespace compiler::syntax
 
 	class descriptor_statements {};
 
-	class descriptor_define_local_variables {};
+	class descriptor_define_local_variables
+	{
+	public:
+		bool is_static, is_global = false;
+
+		descriptor_define_local_variables(bool is_static);
+	};
 
 	class descriptor_define_variable
 	{
@@ -21,6 +27,7 @@ namespace compiler::syntax
 		type_representation type;
 		string name;
 		vector<AST> dim;
+		size_t ptr;
 	};
 
 	class descriptor_if {};
@@ -37,6 +44,15 @@ namespace compiler::syntax
 		string op;
 
 		descriptor_assign(const string &op);
+	};
+
+	class descriptor_inc
+	{
+	public:
+		int delta;
+		bool increase_first; // => result is lvalue
+
+		descriptor_inc(int delta, bool increase_first);
 	};
 
 	class descriptor_binary_operator

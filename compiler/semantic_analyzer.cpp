@@ -37,7 +37,10 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 		variables.emplace_back();
 
 		for (auto &i : ast->children)
+		{
 			deduce_type(i);
+			i->discard_result = true;
+		}
 
 		variables.pop_back();
 		return type_representation();
@@ -124,6 +127,9 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 				auto type = deduce_type(j->children[0]);
 				if (!desc.type.base_type->is_assignable_from(type.base_type))
 					prog->compilation_error(j->t, "Type %s does not accept value type %s", desc.type.base_type->id.c_str(), type.base_type->id.c_str());
+
+				if (*desc.type.base_type != *type.base_type)
+					j->children[0] = assign_cast_node(j->children[0], type, desc.type);
 			}
 
 		}
@@ -136,38 +142,47 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 		auto ltype = deduce_type(ast->children[0]);
 		auto rtype = deduce_type(ast->children[1]);
 
-		if (ltype.base_type->is_array())
+		if (desc.op == ",")
 		{
-			type_array *arr = dynamic_cast<type_array*>(ltype.base_type.get());
-			ltype.base_type = arr->to_pointer();
-		}
-
-		if (ltype.base_type->is_pointer())
-		{
-			if (!rtype.base_type->is_integral())
-				prog->compilation_error(ast->t, "Only integral is accepted here.");
-			else if (desc.op != "+" && desc.op != "-")
-				prog->compilation_error(ast->t, "Pointers can only add or subtract.");
-			else
-			{
-				ast->type = ltype;
-				return ast->type;
-			}
+			ast->children[0]->discard_result = true;
+			return ast->type = rtype;
 		}
 		else
 		{
-			auto type = ltype.base_type->implicit_cast_with(ltype.base_type, rtype.base_type);
-			auto typer = type_representation(type, ltype.is_const || rtype.is_const, false);
-			if (type == nullptr)
-				prog->compilation_error(ast->t, "Type %s and type %s are incompatible", ltype.base_type->id.c_str(), rtype.base_type->id.c_str());
+
+			if (ltype.base_type->is_array())
+			{
+				type_array *arr = dynamic_cast<type_array*>(ltype.base_type.get());
+				ltype.base_type = arr->to_pointer();
+			}
+
+			if (ltype.base_type->is_pointer())
+			{
+				if (!rtype.base_type->is_integral())
+					prog->compilation_error(ast->t, "Only integral is accepted here.");
+				else if (desc.op != "+" && desc.op != "-")
+					prog->compilation_error(ast->t, "Pointers can only add or subtract.");
+				else
+				{
+					ast->type = ltype;
+					return ast->type;
+				}
+			}
 			else
 			{
-				ast->type = type_representation(type);
-				if (*ltype.base_type != *type)
-					ast->children[0] = cast_node(ast->children[0], ltype, typer);
-				if (*rtype.base_type != *type)
-					ast->children[1] = cast_node(ast->children[1], rtype, typer);
-				return ast->type;
+				auto type = ltype.base_type->implicit_cast_with(ltype.base_type, rtype.base_type);
+				auto typer = type_representation(type, ltype.is_const || rtype.is_const, false);
+				if (type == nullptr)
+					prog->compilation_error(ast->t, "Type %s and type %s are incompatible", ltype.base_type->id.c_str(), rtype.base_type->id.c_str());
+				else
+				{
+					ast->type = type_representation(type);
+					if (*ltype.base_type != *type)
+						ast->children[0] = cast_node(ast->children[0], ltype, typer);
+					if (*rtype.base_type != *type)
+						ast->children[1] = cast_node(ast->children[1], rtype, typer);
+					return ast->type;
+				}
 			}
 		}
 	}
@@ -183,7 +198,7 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 		if (*ltype.base_type != *rtype.base_type)
 			ast->children[1] = assign_cast_node(ast->children[1], rtype, ltype);
 
-		return ltype;
+		return ast->type = ltype;
 	}
 	else if (ast->desc.type() == typeid(descriptor_unary_operator))
 	{
@@ -354,7 +369,9 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 	else
 	{
 		for (auto &i : ast->children)
+		{
 			deduce_type(i);
+		}
 		return type_representation();
 	}
 }

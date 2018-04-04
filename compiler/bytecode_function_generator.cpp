@@ -6,6 +6,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <any>
+#include "variable_layer.h"
 #include "unit_assert.h"
 #include "string_utils.h"
 
@@ -25,19 +26,9 @@ void compiler::bytecode_function_generator::modify(int index, const instruction_
 	f->get_instructions()[index] = inst;
 }
 
-compiler::bytecode_function_generator::bytecode_function_generator(bytecode_generator *generator)
-	: bytecode_function_generator(generator, nullptr)
-{
-}
-
 compiler::bytecode_function_generator::bytecode_function_generator(bytecode_generator *generator, variables_layer *global)
 	: generator(generator), global_vars(global), f(new func)
 {
-}
-
-void compiler::bytecode_function_generator::set_global()
-{
-	for_global = true;
 }
 
 void compiler::bytecode_function_generator::build_expression(AST ast)
@@ -58,8 +49,6 @@ void compiler::bytecode_function_generator::build_statements(AST ast)
 {
 	assert_eq(ast->desc.type(), typeid(descriptor_statements));
 
-	size_t prev_var_sz = var_size;
-
 	variables.emplace_back(variables.back().ptr);
 
 	for (auto &i : ast->children)
@@ -68,34 +57,41 @@ void compiler::bytecode_function_generator::build_statements(AST ast)
 			build_statements(i);
 		else if (i->desc.type() == typeid(descriptor_define_local_variables))
 		{
+			auto local_desc = any_cast<descriptor_define_local_variables>(i->desc);
 			for (auto &j : i->children)
 			{
 				auto desc = any_cast<descriptor_define_variable>(j->desc);
 				auto &layer = variables.back();
-				layer.variables[desc.name] = { layer.ptr, desc.type };
 
-				if (j->children.size() == 1)
+				// create a new variable
+				// do not create static variables in function.
+				if (!desc.type.is_static)
 				{
-					if (desc.type.is_static)
-						append(get_instruction_load_static(desc.type.base_type, layer.ptr));
-					else
-						append(get_instruction_load(desc.type.base_type, layer.ptr));
+					desc.ptr = layer.ptr;
+					j->desc = desc;
 
-					build_expression(j->children[0]);
-					append(instruction_ptr(new instruction_store()));
+					if (j->children.size() == 1) // initialize the new variable
+					{
+						append(get_instruction_load(desc.type, desc.ptr));
+
+						build_expression(j->children[0]);
+						append(instruction_ptr(new instruction_store()));
+						append(instruction_ptr(new instruction_pop()));
+					}
+
+					size_t sz = desc.type.base_type->size();
+					for (auto &t : desc.dim)
+					{
+						assert_eq(t->desc.type(), typeid(descriptor_constant));
+						sz *= boost::lexical_cast<size_t>(any_cast<descriptor_constant>(t->desc).value);
+					}
+
+					layer.ptr += sz;
+					max_variable_size = max(max_variable_size, layer.ptr);
 				}
 
-				size_t sz = desc.type.base_type->size();
-				for (auto &t : desc.dim)
-				{
-					assert_eq(t->desc.type(), typeid(descriptor_constant));
-					sz *= boost::lexical_cast<size_t>(any_cast<descriptor_constant>(t->desc).value);
-				}
-				layer.ptr += sz;
-				var_size += sz;
-
-				if (var_size > max_variable_size)
-					max_variable_size = var_size;
+				// register variable whatever static or non-static variables.
+				layer.variables[desc.name] = { desc.ptr, desc.type };
 			}
 		}
 		else if (i->desc.type() != typeid(descriptor_function))
@@ -103,14 +99,12 @@ void compiler::bytecode_function_generator::build_statements(AST ast)
 			build_expression(i);
 
 			// TODO: pop elements in no need
-			//if (i->type.base_type != nullptr && !i->type.base_type->is_void())
-			//	append(instruction_ptr(new instruction_pop()));
+			if (i->type.base_type != nullptr && !i->type.base_type->is_void())
+				append(instruction_ptr(new instruction_pop()));
 		}
 	}
 
-	if (!for_global)
-		variables.pop_back();
-	var_size = prev_var_sz;
+	variables.pop_back();
 }
 
 size_t compiler::bytecode_function_generator::get_constant_string_pool_ptr()
@@ -185,7 +179,6 @@ func_ptr compiler::bytecode_function_generator::build(AST ast)
 
 	f->local_size = max_variable_size;
 
-	if (!for_global)
-		variables.pop_back();
+	variables.pop_back();
 	return f;
 }

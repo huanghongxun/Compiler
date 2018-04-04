@@ -36,22 +36,22 @@ public:
 		Assert::AreEqual((int)res.size(), 61);
 	}
 
-	TEST_METHOD(test_digit_hex) {
+	TEST_METHOD(test_lexical_analyzer_digit_hex) {
 		program_ptr p = make_shared<program>("0x7FFFFFFF");
 		Assert::AreEqual((int)lexical_analyzer(p).analyze().size(), 1);
 	}
 
-	TEST_METHOD(test_digit_double) {
+	TEST_METHOD(test_lexical_analyzer_digit_double) {
 		program_ptr p = make_shared<program>("2.5");
 		Assert::AreEqual((int)lexical_analyzer(p).analyze().size(), 1);
 	}
 
-	TEST_METHOD(test_digit_oct) {
+	TEST_METHOD(test_lexical_analyzer_digit_oct) {
 		program_ptr p = make_shared<program>("0800l");
 		Assert::AreEqual((int)lexical_analyzer(p).analyze().size(), 1);
 	}
 
-	TEST_METHOD(test_digit_scientific) {
+	TEST_METHOD(test_lexical_analyzer_digit_scientific) {
 		program_ptr p = make_shared<program>("1e9");
 		Assert::AreEqual((int)lexical_analyzer(p).analyze().size(), 1);
 		p = make_shared<program>("1.0e+9");
@@ -60,7 +60,7 @@ public:
 		Assert::AreEqual((int)lexical_analyzer(p).analyze().size(), 1);
 	}
 
-	TEST_METHOD(vm_syntax_analyzer_string)
+	TEST_METHOD(test_lexical_analyzer_string)
 	{
 		Assert::ExpectException<compilation_error>([this]() {
 			program_ptr p = make_shared<program>("#include <iostream>\n"
@@ -76,7 +76,7 @@ public:
 				"int __built_in printf(const char* fmt, ...);\n"
 				"int main() {\n"
 				"    int local;\n"
-				"    scanf(\"%d \\n \\t \\f \\x\", &local);\n"
+				"    scanf(\"%d \\n \\t \\f \\x\", &local);\n" // \x000X
 				"    printf(\"%d\", local);\n"
 				"    return 0;\n"
 				"}");

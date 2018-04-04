@@ -110,7 +110,8 @@ public:
 			"{\n"
 			"double d = 2.1;\n"
 			"assert_neq_double(d, 2.2);\n"
-			"assert_eq_double(d, 2.1);\n"
+			"d *= 2;\n"
+			"assert_eq_double(d, 4.2);\n"
 			"return 0;\n"
 			"}");
 	}
@@ -129,6 +130,19 @@ public:
 			"{\n"
 			"i = ((i * 9 + 5) % 9 + 1) / 2;\n"
 			"assert(i, 3); assert_neq(i, 4);\n"
+			"return 0;\n"
+			"}");
+	}
+
+	TEST_METHOD(test_vm_static_var) {
+		test("int test() {\n"
+			"    static int i = 1;\n"
+			"	 return i += 1;\n"
+			"}\n"
+			"int main()\n"
+			"{\n"
+			"assert((test(), test(), test()), 4);\n"
+			"assert(test(), 5);\n"
 			"return 0;\n"
 			"}");
 	}
@@ -248,7 +262,30 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_func_for) {
+	TEST_METHOD(test_vm_comma_expression) {
+		test("int main()\n"
+			"{\n"
+			"int i;\n"
+			"i = (2, 5);\n"
+			"assert(5, i);\n"
+			"return 0;\n"
+			"}");
+	}
+
+	TEST_METHOD(test_vm_if_else) {
+		test("int main()\n"
+			"{\n"
+			"int i = 2;\n"
+			"if (i == 2)\n"
+			"	 i = (i * 7 % 3);\n"
+			"else"
+			"	 i = 0;\n"
+			"assert(2, i);\n"
+			"return 0;\n"
+			"}");
+	}
+
+	TEST_METHOD(test_vm_for) {
 		test("int factorial(int i)\n"
 			"{\n"
 			"if (i == 0) return 1; \n"

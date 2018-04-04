@@ -25,6 +25,7 @@ compiler::virtual_machine::virtual_machine(bytecode && code)
 
 void compiler::virtual_machine::init()
 {
+	global.reset();
 	execute_function("__init__", vector<object_t>{});
 }
 
@@ -69,8 +70,8 @@ object_t compiler::virtual_machine::execute_function(const string & func_name, c
 		if (ret)
 		{
 			auto res = func->return_type.base_type->is_void() ? object_t() : stack.pop().value;
-			//if (!stack.empty())
-			//	throw runtime_error("Operand stack is not empty when returning");
+			if (!stack.empty())
+				throw runtime_error("Operand stack is not empty when returning");
 			return res;
 		}
 	}

@@ -7,18 +7,11 @@
 #include "instruction.h"
 #include "syntax_tree.h"
 #include "program.h"
+#include "variable_layer.h"
 
 namespace compiler
 {
 	using namespace std;
-
-	struct variables_layer
-	{
-		size_t ptr = 0;
-		map<string, pair<size_t, type_representation>> variables;
-
-		explicit variables_layer(size_t ptr);
-	};
 
 	class bytecode_appender
 	{

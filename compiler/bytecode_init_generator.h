@@ -10,23 +10,21 @@
 
 namespace compiler
 {
-	class bytecode_function_generator : public bytecode_appender
+	class bytecode_init_generator : public bytecode_appender
 	{
 		bytecode_generator *generator;
-		vector<variables_layer> variables;
-		size_t var_size = 0, max_variable_size = 0;
+		variables_layer global_vars;
 		func_ptr f;
-		variables_layer *global_vars;
 
 		int append(const instruction_ptr &inst) override;
 		void modify(int index, const instruction_ptr &inst) override;
 	public:
-		bytecode_function_generator(bytecode_generator *generator, variables_layer *global_vars);
+		bytecode_init_generator(bytecode_generator *generator);
 
 		void build_expression(AST ast);
 		void build_statements(AST ast);
 
-		func_ptr build(AST ast);
+		func_ptr build(AST statements);
 
 		size_t get_constant_string_pool_ptr() override;
 		void increase_constant_string_pool_ptr(size_t offset) override;

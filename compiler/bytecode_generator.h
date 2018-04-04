@@ -25,8 +25,8 @@ namespace compiler
 
 		bytecode_generator(program_ptr prog);
 
+		void build_static_vars(AST ast, AST init);
 		bytecode build(AST ast);
-		void build_func(AST ast);
 		void build_func(AST ast, variables_layer *layer);
 
 		size_t get_constant_string_pool_ptr();

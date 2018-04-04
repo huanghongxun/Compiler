@@ -155,6 +155,7 @@
     <ClInclude Include="bytecode_function_generator.h" />
     <ClInclude Include="bytecode_generator.h" />
     <ClInclude Include="bytecode_generators.h" />
+    <ClInclude Include="bytecode_init_generator.h" />
     <ClInclude Include="compilation_error.h" />
     <ClInclude Include="descriptor.h" />
     <ClInclude Include="func.h" />
@@ -186,16 +187,18 @@
     <ClInclude Include="type_struct.h" />
     <ClInclude Include="unit_assert.h" />
     <ClInclude Include="utility.h" />
+    <ClInclude Include="variable_layer.h" />
     <ClInclude Include="virtual_machine.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="assign_cast.cpp" />
     <ClCompile Include="built_in_function.cpp" />
     <ClCompile Include="built_in_functions.cpp" />
     <ClCompile Include="bytecode.cpp" />
-    <ClCompile Include="bytecode_appender.cpp" />
     <ClCompile Include="bytecode_function_generator.cpp" />
     <ClCompile Include="bytecode_generator.cpp" />
     <ClCompile Include="bytecode_generators.cpp" />
+    <ClCompile Include="bytecode_init_generator.cpp" />
     <ClCompile Include="compilation_error.cpp" />
     <ClCompile Include="descriptor.cpp" />
     <ClCompile Include="func.cpp" />
@@ -228,6 +231,7 @@
     <ClCompile Include="type_primitive.cpp" />
     <ClCompile Include="type_struct.cpp" />
     <ClCompile Include="unit_assert.cpp" />
+    <ClCompile Include="variable_layer.cpp" />
     <ClCompile Include="virtual_machine.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
