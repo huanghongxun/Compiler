@@ -54,8 +54,6 @@ void compiler::instructions::instruction_store::operate(function_environment & e
 	memcpy(lhs.addr, rhs.value.get_raw_memory(), rhs.value.get_raw_memory_size());
 
 	operand_stack_element e(rhs.value, lhs.addr);
-	e.type = lhs.type;
-
 	env.stack->push(e);
 }
 
@@ -110,12 +108,11 @@ void compiler::instructions::instruction_reference::operate(function_environment
 {
 	auto op1 = env.stack->pop();
 	auto e = operand_stack_element(op1.addr);
-	e.type = wrap_pointer(type);
 	env.stack->push(e);
 }
 
-compiler::instructions::instruction_move::instruction_move(bool move_positive)
-	: move_positive(move_positive)
+compiler::instructions::instruction_move::instruction_move(size_t sz, bool move_positive)
+	: sz(sz), move_positive(move_positive)
 {
 }
 
@@ -125,10 +122,8 @@ void compiler::instructions::instruction_move::operate(function_environment & en
 	auto op1 = env.stack->pop();
 
 	int offset = op2.value.cast<int>() * (move_positive ? 1 : -1);
-	type_pointer *p = dynamic_cast<type_pointer*>(op1.type.base_type.get());
 
-	auto e = operand_stack_element((void*)((char*)op1.value.cast<void*>() + offset * (long long) p->get_base_type()->size()));
-	e.type = op1.type;
+	auto e = operand_stack_element((void*)((char*)op1.value.cast<void*>() + offset * (long long) sz));
 	env.stack->push(e);
 }
 
@@ -139,12 +134,6 @@ compiler::instructions::instruction_pointer_cast::instruction_pointer_cast(type_
 
 void compiler::instructions::instruction_pointer_cast::operate(function_environment & env)
 {
-	auto op1 = env.stack->pop();
-	assert_cond(*op1.type.base_type == *from_type.base_type);
-
-	auto res = operand_stack_element(op1.value, op1.addr);
-	res.type = to_type;
-	env.stack->push(res);
 }
 
 compiler::instructions::instruction_load_array::instruction_load_array(type_base_ptr type, int index, bool is_static)
@@ -160,6 +149,5 @@ void compiler::instructions::instruction_load_array::operate(function_environmen
 	else
 		addr = env.local->get<void*>(index);
 	operand_stack_element e(addr, addr);
-	e.type = type_representation{ dynamic_pointer_cast<type_array>(type)->to_pointer() };
 	env.stack->push(e);
 }

@@ -254,7 +254,30 @@ namespace compiler::instructions
 			object_t new_value = op.value.cast<T>() + (T)inc;
 
 			operand_stack_element e(new_value, op.addr);
-			e.type = op.type;
+			env.stack->push(e);
+		}
+	};
+
+	struct instruction_dereference_pointer : public instruction
+	{
+		void operate(function_environment& env) override
+		{
+			auto op1 = env.stack->pop();
+			void *value = op1.value.cast<void*>();
+
+			auto e = operand_stack_element(*reinterpret_cast<void**>(value), value);
+			env.stack->push(e);
+		}
+	};
+
+	struct instruction_dereference_array : public instruction
+	{
+		void operate(function_environment& env) override
+		{
+			auto op1 = env.stack->pop();
+			void *value = op1.value.cast<void*>();
+
+			auto e = operand_stack_element(value, value);
 			env.stack->push(e);
 		}
 	};
@@ -267,30 +290,8 @@ namespace compiler::instructions
 			auto op1 = env.stack->pop();
 			void *value = op1.value.cast<void*>();
 
-			if (op1.type.base_type->is_pointer())
-			{
-				type_pointer*p = dynamic_cast<type_pointer*>(op1.type.base_type.get());
-				if (p->get_base_type()->is_pointer())
-				{
-					auto e = operand_stack_element(*reinterpret_cast<void**>(value), value);
-					e.type = type_representation{ p->get_base_type(), p->is_const(), false };
-					env.stack->push(e);
-				}
-				else if (p->get_base_type()->is_array())
-				{
-					auto e = operand_stack_element(value, value);
-					type_array *p2 = dynamic_cast<type_array*>(p->get_base_type().get());
-					e.type = type_representation{ p2->to_pointer(), false, false };
-					env.stack->push(e);
-				}
-				else
-				{
-					T* op1 = reinterpret_cast<T*>(value);
-					env.stack->push(operand_stack_element(*op1, op1));
-				}
-			}
-			else
-				throw runtime_error("Illegal state of operand stack");
+			T* val = reinterpret_cast<T*>(value);
+			env.stack->push(operand_stack_element(*val, val));
 		}
 	};
 
@@ -305,8 +306,9 @@ namespace compiler::instructions
 
 	struct instruction_move : public instruction
 	{
+		size_t sz;
 		bool move_positive;
-		explicit instruction_move(bool move_positive);
+		instruction_move(size_t sz, bool move_positive);
 
 		void operate(function_environment& env) override;
 	};

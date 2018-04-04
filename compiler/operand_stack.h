@@ -20,7 +20,6 @@ namespace compiler
 
 		const object_t value;
 		void *const addr;
-		type_representation type;
 
 		void assert_type(const type_index &index);
 	};

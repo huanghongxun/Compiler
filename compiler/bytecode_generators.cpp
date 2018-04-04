@@ -199,13 +199,21 @@ void compiler::bytecode_binary_operator::build(bytecode_appender &appender, AST 
 		appender.build_expression(ast->children[1]);
 
 		auto type_name = ast->children[0]->type.base_type->id;
-		if (ast->children[0]->type.base_type->is_pointer() ||
-			ast->children[0]->type.base_type->is_array())
+		if (ast->children[0]->type.base_type->is_pointer())
 		{
+			auto pointer = dynamic_pointer_cast<type_pointer>(ast->children[0]->type.base_type);
 			assert_cond(ast->children[1]->type.base_type->is_primitive());
-			auto type = dynamic_cast<type_primitive*>(ast->children[1]->type.base_type.get());
+			auto type = dynamic_pointer_cast<type_primitive>(ast->children[1]->type.base_type);
 			assert_cond(type->is_integral());
-			appender.append(instruction_ptr(new instruction_move(desc.op == "+")));
+			appender.append(instruction_ptr(new instruction_move(pointer->get_base_type()->size(), desc.op == "+")));
+		}
+		else if (ast->children[0]->type.base_type->is_array())
+		{
+			auto pointer = dynamic_pointer_cast<type_array>(ast->children[0]->type.base_type);
+			assert_cond(ast->children[1]->type.base_type->is_primitive());
+			auto type = dynamic_pointer_cast<type_primitive>(ast->children[1]->type.base_type);
+			assert_cond(type->is_integral());
+			appender.append(instruction_ptr(new instruction_move(pointer->get_base_type()->size(), desc.op == "+")));
 		}
 		else
 		{
@@ -235,6 +243,28 @@ void compiler::bytecode_binary_operator::build(bytecode_appender &appender, AST 
 				appender.get_program()->compilation_error(ast->t, "Type %s does not accept operator %s", type_name.c_str(), desc.op.c_str());
 		}
 	}
+}
+
+bool build_unary_pointer_pointer(AST ast, const string &op, bytecode_appender &appender)
+{
+	if (op == "&")
+		appender.append(instruction_ptr(new instruction_reference(ast->children[0]->type)));
+	else if (op == "*")
+		appender.append(instruction_ptr(new instruction_dereference_pointer()));
+	else
+		return false;
+	return true;
+}
+
+bool build_unary_pointer_array(AST ast, const string &op, bytecode_appender &appender)
+{
+	if (op == "&")
+		appender.append(instruction_ptr(new instruction_reference(ast->children[0]->type)));
+	else if (op == "*")
+		appender.append(instruction_ptr(new instruction_dereference_array()));
+	else
+		return false;
+	return true;
 }
 
 template<typename T>
@@ -334,8 +364,10 @@ void compiler::bytecode_unary_operator::build(bytecode_appender &appender, AST a
 			flag = build_unary_pointer<double>(ast, desc.op, appender);
 		else if (type_name == type_long_double->id)
 			flag = build_unary_pointer<long double>(ast, desc.op, appender);
-		else if (p->get_base_type()->is_pointer() || p->get_base_type()->is_array())
-			flag = build_unary_pointer<int>(ast, desc.op, appender);
+		else if (p->get_base_type()->is_pointer())
+			flag = build_unary_pointer_pointer(ast, desc.op, appender);
+		else if (p->get_base_type()->is_array())
+			flag = build_unary_pointer_array(ast, desc.op, appender);
 	}
 	else
 		assert_cond(false); // Must be processed in semantic analyzer.
