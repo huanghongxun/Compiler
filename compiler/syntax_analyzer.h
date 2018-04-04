@@ -23,12 +23,14 @@ namespace compiler
         int ptr = 0;
 		vector<unique_ptr<parser>> parsers;
 
-		map<string, type_base_ptr> types;
+		map<string, type_representation> types;
 		void register_type(type_base_ptr type);
 		void alias_type(const string &origin, const string &alias);
 
 		bool is_type_token(const string &type);
 		bool is_pointer_token(const string &type);
+
+		void expect_code(token expected, string actual);
 
 		AST parse_left_associativity_operator(function<AST()> inside, function<bool(string)> predicate);
 		AST parse_left_unary_operator(function<AST()> inside, function<bool(string)> predicate);
@@ -46,13 +48,14 @@ namespace compiler
         void assert_next_token(const string &token);
 
 		AST analyze();
-		map<string, type_base_ptr> get_types();
+		map<string, type_representation> get_types();
 
 		AST parse_root();
 		AST parse_define_vars(bool force_static = false);
 		AST parse_define_var(const type_representation &type);
 		AST parse_statement();
 		AST parse_packed_statements();
+		AST parse_typedef();
 		AST parse_statements();
 		AST parse_expression();
 		AST parse_unit0();
@@ -72,6 +75,7 @@ namespace compiler
 		AST parse_unit14();
 		AST parse_unit15();
 		AST parse_unit16();
+		AST parse_unit17();
 
 		type_representation parse_type();
 		type_representation parse_pointer(type_representation base_type);

@@ -239,6 +239,27 @@ namespace compiler::instructions
 	};
 
 	template<typename T>
+	struct instruction_inc : public instruction
+	{
+		int inc;
+		explicit instruction_inc(int inc)
+			: inc(inc)
+		{
+		}
+
+		void operate(function_environment& env) override
+		{
+			auto op = env.stack->pop();
+			assert_cond(op.addr != nullptr);
+			object_t new_value = op.value.cast<T>() + (T)inc;
+
+			operand_stack_element e(new_value, op.addr);
+			e.type = op.type;
+			env.stack->push(e);
+		}
+	};
+
+	template<typename T>
 	struct instruction_dereference : public instruction
 	{
 		void operate(function_environment& env) override

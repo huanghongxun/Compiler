@@ -61,3 +61,8 @@ compiler::syntax::descriptor_define_local_variables::descriptor_define_local_var
 	: is_static(is_static)
 {
 }
+
+compiler::syntax::descriptor_inc::descriptor_inc(int delta, bool increase_first)
+	: delta(delta), increase_first(increase_first)
+{
+}

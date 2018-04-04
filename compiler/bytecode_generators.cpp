@@ -514,3 +514,43 @@ void compiler::bytecode_primitive_cast::build(bytecode_appender & appender, AST 
 	appender.build_expression(ast->children[0]);
 	appender.append(cast_primitive(desc.from_type.base_type, desc.to_type.base_type));
 }
+
+void build_inc(bytecode_appender & appender, const string &type_name, int delta)
+{
+	if (type_name == type_char->id)
+		appender.append(instruction_ptr(new instruction_inc<char>(delta)));
+	else if (type_name == type_int->id)
+		appender.append(instruction_ptr(new instruction_inc<int>(delta)));
+	else if (type_name == type_short->id)
+		appender.append(instruction_ptr(new instruction_inc<short>(delta)));
+	else if (type_name == type_long->id)
+		appender.append(instruction_ptr(new instruction_inc<long>(delta)));
+	else if (type_name == type_long_long->id)
+		appender.append(instruction_ptr(new instruction_inc<long long>(delta)));
+	else
+		assert_cond(0);
+}
+
+void compiler::bytecode_inc::build(bytecode_appender & appender, AST ast)
+{
+	auto desc = any_cast<descriptor_inc>(ast->desc);
+	assert_eq(ast->children.size(), 1);
+
+	appender.build_expression(ast->children[0]);
+	if (desc.increase_first) // ++x
+	{
+		appender.append(instruction_ptr(new instruction_duplicate()));
+		auto type_name = ast->children[0]->type.base_type->id;
+		build_inc(appender, type_name, desc.delta);
+		appender.append(instruction_ptr(new instruction_store()));
+	}
+	else // x++
+	{
+		appender.append(instruction_ptr(new instruction_duplicate()));
+		appender.append(instruction_ptr(new instruction_duplicate()));
+		auto type_name = ast->children[0]->type.base_type->id;
+		build_inc(appender, type_name, desc.delta);
+		appender.append(instruction_ptr(new instruction_store()));
+		appender.append(instruction_ptr(new instruction_pop()));
+	}
+}

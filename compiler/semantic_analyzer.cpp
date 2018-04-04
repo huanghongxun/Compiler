@@ -291,6 +291,13 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 
 		return ast->type;
 	}
+	else if (ast->desc.type() == typeid(descriptor_inc))
+	{
+		auto type = deduce_type(ast->children[0]);
+		if (!type.base_type->is_pointer() && !type.base_type->is_integral())
+			prog->compilation_error(ast->t, "Self-increasing only accepts integral and pointer.");
+		return ast->type = type;
+	}
 	else if (ast->desc.type() == typeid(descriptor_primitive_cast))
 	{
 		auto desc = any_cast<descriptor_primitive_cast>(ast->desc);
@@ -391,24 +398,17 @@ void compiler::semantic_analyzer::check_func_definition(AST ast)
 
 void compiler::semantic_analyzer::convert_array_access(AST &ast)
 {
-	if (ast->desc.type() == typeid(descriptor_var))
+	if (ast->desc.type() == typeid(descriptor_array_access))
 	{
-		AST new_node = AST(new syntax_tree(*ast));
-		new_node->children.clear();
-
 		for (auto &i : ast->children)
-		{
-			AST move_node = make_shared<syntax_tree>(descriptor_binary_operator("+"), ast->t);
-			move_node->add_children(new_node);
-			move_node->add_children(i);
+			convert_array_access(i);
 
-			AST deref_node = make_shared<syntax_tree>(descriptor_unary_operator("*"), ast->t);
-			deref_node->add_children(move_node);
+		ast->desc = descriptor_binary_operator("+");
 
-			new_node = deref_node;
-		}
+		AST deref_node = make_shared<syntax_tree>(descriptor_unary_operator("*"), ast->t);
+		deref_node->add_children(ast);
 
-		ast = new_node;
+		ast = deref_node;
 	}
 	else
 		for (auto &i : ast->children)

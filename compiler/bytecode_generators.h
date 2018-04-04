@@ -18,6 +18,12 @@ namespace compiler
 		virtual void build(bytecode_appender &appender, AST ast) = 0;
 	};
 
+	class bytecode_inc : public bytecode_generator_base
+	{
+	public:
+		void build(bytecode_appender &appender, AST ast) override;
+	};
+
 	class bytecode_assign : public bytecode_generator_base
 	{
 	public:

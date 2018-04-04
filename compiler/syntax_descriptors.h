@@ -9,9 +9,10 @@ using namespace std;
 
 namespace compiler::syntax
 {
-
+	// Children: ...
 	class descriptor_statements {};
 
+	// Children: Define variables...
 	class descriptor_define_local_variables
 	{
 	public:
@@ -20,6 +21,7 @@ namespace compiler::syntax
 		descriptor_define_local_variables(bool is_static);
 	};
 
+	// No Children
 	class descriptor_define_variable
 	{
 	public:
@@ -30,14 +32,19 @@ namespace compiler::syntax
 		size_t ptr;
 	};
 
+	// Children: Boolean Expression, Statements, Else-statements
 	class descriptor_if {};
 
+	// Children: Boolean Expression, Statements
 	class descriptor_while {};
 
+	// Children: Expression
 	class descriptor_return {};
 
+	// Children: Expression
 	class descriptor_sizeof {};
 
+	// Children: Expression, Expression
 	class descriptor_assign
 	{
 	public:
@@ -46,6 +53,7 @@ namespace compiler::syntax
 		descriptor_assign(const string &op);
 	};
 
+	// Children: Expression
 	class descriptor_inc
 	{
 	public:
@@ -55,6 +63,7 @@ namespace compiler::syntax
 		descriptor_inc(int delta, bool increase_first);
 	};
 
+	// Children: Expression, Expression
 	class descriptor_binary_operator
 	{
 	public:
@@ -63,6 +72,7 @@ namespace compiler::syntax
 		descriptor_binary_operator(const string &op);
 	};
 
+	// Children: Expression
 	class descriptor_unary_operator
 	{
 	public:
@@ -71,6 +81,7 @@ namespace compiler::syntax
 		descriptor_unary_operator(const string &op);
 	};
 
+	// Children: Callee, Args...
 	class descriptor_func_call
 	{
 	public:
@@ -79,6 +90,10 @@ namespace compiler::syntax
 		descriptor_func_call(const string &name);
 	};
 
+	// Children: Callee, Arg
+	class descriptor_array_access {};
+
+	// No Children
 	class descriptor_var
 	{
 	public:
@@ -87,6 +102,7 @@ namespace compiler::syntax
 		descriptor_var(const string &name);
 	};
 
+	// No Children
 	class descriptor_constant
 	{
 	public:
@@ -95,6 +111,7 @@ namespace compiler::syntax
 		descriptor_constant(const string &value);
 	};
 
+	// Children: Statements
 	class descriptor_function
 	{
 	public:
@@ -108,6 +125,7 @@ namespace compiler::syntax
 		void calc_signature();
 	};
 
+	// Children: Expression
 	class descriptor_primitive_cast
 	{
 	public:

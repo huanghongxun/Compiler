@@ -27,6 +27,7 @@ compiler::bytecode_generator::bytecode_generator(program_ptr prog)
 	generators[type_index(typeid(descriptor_func_call))] = make_shared<bytecode_func_call>();
 	generators[type_index(typeid(descriptor_constant))] = make_shared<bytecode_constant>();
 	generators[type_index(typeid(descriptor_var))] = make_shared<bytecode_var>();
+	generators[type_index(typeid(descriptor_inc))] = make_shared<bytecode_inc>();
 
 	generators[type_index(typeid(descriptor_primitive_cast))] = make_shared<bytecode_primitive_cast>();
 

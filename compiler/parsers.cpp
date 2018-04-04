@@ -16,12 +16,12 @@ compiler::AST compiler::parser_if::parse() {
 
 	m_syntax_analyzer->assert_next_token("if");
 	m_syntax_analyzer->assert_next_token("(");
-	ast->children.push_back(m_syntax_analyzer->parse_expression());
+	ast->add_children(m_syntax_analyzer->parse_expression());
 	m_syntax_analyzer->assert_next_token(")");
-	ast->children.push_back(m_syntax_analyzer->parse_packed_statements());
+	ast->add_children(m_syntax_analyzer->parse_packed_statements());
 	if (m_syntax_analyzer->peek_token("else")) {
 		m_syntax_analyzer->assert_next_token("else");
-		ast->children.push_back(m_syntax_analyzer->parse_packed_statements());
+		ast->add_children(m_syntax_analyzer->parse_packed_statements());
 	}
 
 	return ast;
@@ -54,13 +54,13 @@ compiler::AST compiler::parser_for::parse() {
 	m_syntax_analyzer->assert_next_token("for");
 	m_syntax_analyzer->assert_next_token("(");
 	if (!m_syntax_analyzer->peek_token(";"))
-		ast->children.push_back(parse_for1());
+		ast->add_children(parse_for1());
 
 	AST nest = make_shared<syntax_tree>(descriptor_while(), m_syntax_analyzer->peek_token_with_code_info());
 	if (m_syntax_analyzer->peek_token(";"))
-		nest->children.push_back(make_shared<syntax_tree>(descriptor_constant("true"), m_syntax_analyzer->peek_token_with_code_info()));
+		nest->add_children(make_shared<syntax_tree>(descriptor_constant("true"), m_syntax_analyzer->peek_token_with_code_info()));
 	else
-		nest->children.push_back(m_syntax_analyzer->parse_expression());
+		nest->add_children(m_syntax_analyzer->parse_expression());
 
 	m_syntax_analyzer->assert_next_token(";");
 
@@ -94,9 +94,9 @@ compiler::AST compiler::parser_while::parse()
 
 	m_syntax_analyzer->assert_next_token("while");
 	m_syntax_analyzer->assert_next_token("(");
-	ast->children.push_back(m_syntax_analyzer->parse_expression());
+	ast->add_children(m_syntax_analyzer->parse_expression());
 	m_syntax_analyzer->assert_next_token(")");
-	ast->children.push_back(m_syntax_analyzer->parse_packed_statements());
+	ast->add_children(m_syntax_analyzer->parse_packed_statements());
 
 	return ast;
 }
@@ -114,7 +114,7 @@ compiler::AST compiler::parser_return::parse()
 	AST ast = make_shared<syntax_tree>(descriptor_return(), m_syntax_analyzer->peek_token_with_code_info());
 
 	m_syntax_analyzer->assert_next_token("return");
-	ast->children.push_back(m_syntax_analyzer->parse_expression());
+	ast->add_children(m_syntax_analyzer->parse_expression());
 	m_syntax_analyzer->assert_next_token(";");
 
 	return ast;
