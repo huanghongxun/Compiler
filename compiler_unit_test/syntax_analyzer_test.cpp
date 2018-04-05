@@ -82,6 +82,33 @@ public:
 		});
 	}
 
+	TEST_METHOD(test_syntax_analyzer_array_assigning) {
+		Assert::ExpectException<compilation_error>([this]() {
+			test("int arr[10];\n"
+				"int main()\n"
+				"{\n"
+				"int i;\n"
+				"arr = &i;\n"
+				"return 0;\n"
+				"}");
+		});
+	}
+
+	TEST_METHOD(test_syntax_analyzer_increment_lvalue) {
+		// Since i++ has higher priority than ++i has,
+		// ++++i++ can be considered as ++(++(i++)).
+		// As i++ is not a lvalue, ++(i++) can not be compiled.
+		Assert::ExpectException<compilation_error>([this]() {
+			test("int arr[10];\n"
+				"int main()\n"
+				"{\n"
+				"int i = 0;\n"
+				"++++i++;\n"
+				"return 0;\n"
+				"}");
+		});
+	}
+
 	void print(stringstream &ss, AST tree, int depth)
 	{
 		for (int i = 0; i < depth; ++i)

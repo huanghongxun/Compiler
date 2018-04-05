@@ -67,3 +67,15 @@ type_base_ptr compiler::create_array_type(type_base_ptr element_type, const vect
 		res = type_base_ptr(new type_array(res, *it));
 	return res;
 }
+
+type_representation compiler::to_pointer(type_representation array_type)
+{
+	if (!array_type.base_type->is_pointer())
+		throw invalid_argument("Type should be a pointer type.");
+
+	type_array *arr = dynamic_cast<type_array*>(array_type.base_type.get());
+	array_type.base_type = arr->to_pointer();
+	array_type.is_const = true;
+	array_type.is_lvalue = false;
+	return array_type;
+}

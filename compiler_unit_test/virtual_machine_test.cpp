@@ -137,7 +137,7 @@ public:
 	TEST_METHOD(test_vm_static_var) {
 		test("int test() {\n"
 			"    static int i = 1;\n"
-			"	 return i += 1;\n"
+			"	 return ++i;\n"
 			"}\n"
 			"int main()\n"
 			"{\n"
@@ -181,8 +181,6 @@ public:
 		test("int arr[10][10];\n"
 			"int main()\n"
 			"{\n"
-			"for (int i = 0; i < 10; ++i) arr[i][0] = 0;\n"
-			"for (int i = 0; i < 10; i++) arr[0][i] = 0;\n"
 			"arr[1][0] = 1;\n"
 			"for (int i = 1; i < 10; ++i)\n"
 			"    for (int j = 1; j < 10; ++j)\n"
@@ -235,8 +233,8 @@ public:
 		test("int test() { return 1 + 1; }\n"
 			"int main()\n"
 			"{\n"
-			"assert(test(), 2); assert_neq(test(), 3);\n"
-			"return 0;\n"
+			"    assert(test(), 2); assert_neq(test(), 3);\n"
+			"    return 0;\n"
 			"}");
 	}
 
@@ -244,57 +242,59 @@ public:
 		test("int test(int i) { return i * 2; }\n"
 			"int main()\n"
 			"{\n"
-			"assert(test(1), 2); assert(test(5), 10); assert_neq(test(5), 12);\n"
-			"return 0;\n"
+			"    assert(test(1), 2); assert(test(5), 10); assert_neq(test(5), 12);\n"
+			"    return 0;\n"
 			"}");
 	}
 
 	TEST_METHOD(test_vm_func_recursive) {
 		test("int factorial(int i)\n"
 			"{\n"
-			"if (i == 0) return 1; \n"
-			"else return factorial(i - 1) * i;\n"
+			"    if (i == 0) return 1; \n"
+			"    else return factorial(i - 1) * i;\n"
 			"}\n"
 			"int main()\n"
 			"{\n"
-			"assert(factorial(5), 120); assert_neq(factorial(3), 5);\n"
-			"return 0;\n"
+			"    assert(factorial(5), 120); assert_neq(factorial(3), 5);\n"
+			"    return 0;\n"
 			"}");
 	}
 
 	TEST_METHOD(test_vm_comma_expression) {
 		test("int main()\n"
 			"{\n"
-			"int i;\n"
-			"i = (2, 5);\n"
-			"assert(5, i);\n"
-			"return 0;\n"
+			"    int i;\n"
+			"    i = (2, 5);\n"
+			"    assert(5, i);\n"
+			"    return 0;\n"
 			"}");
 	}
 
 	TEST_METHOD(test_vm_if_else) {
 		test("int main()\n"
 			"{\n"
-			"int i = 2;\n"
-			"if (i == 2)\n"
-			"	 i = (i * 7 % 3);\n"
-			"else"
-			"	 i = 0;\n"
-			"assert(2, i);\n"
-			"return 0;\n"
+			"    int i = 2;\n"
+			"    if (i == 2)\n"
+			"        i = (i * 7 % 3);\n"
+			"    else"
+			"	     i = 0;\n"
+			"    assert(2, i);\n"
+			"    return 0;\n"
 			"}");
 	}
 
 	TEST_METHOD(test_vm_for) {
 		test("int factorial(int i)\n"
 			"{\n"
-			"if (i == 0) return 1; \n"
-			"else return factorial(i - 1) * i;\n"
+			"    if (i == 0) return 1; \n"
+			"    else return factorial(i - 1) * i;\n"
 			"}\n"
 			"int main()\n"
-			"{ int ans = 0; for (int i = 0; i < 5; i = i + 1) ans = ans + factorial(i); \n"
-			"assert(ans, 34);\n"
-			"return 0;\n"
+			"{\n"
+			"    int ans = 0;\n"
+			"    for (int i = 0; i < 5; ++i) ans += factorial(i); \n"
+			"    assert(ans, 34);\n"
+			"    return 0;\n"
 			"}");
 	}
 

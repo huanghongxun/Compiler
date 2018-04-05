@@ -169,7 +169,7 @@ compiler::AST compiler::syntax_analyzer::parse_statement()
 			return ast;
 	}
 
-	if (is_name(peek_token(0)) && is_name(peek_token(1)))
+	if (is_type_token(peek_token(0))) // no functional cast here
 		return parse_define_vars();
 
 	auto ast = parse_expression();

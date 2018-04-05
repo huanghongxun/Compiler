@@ -120,6 +120,7 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 			if (!parameters.empty() && parameters.back().count(desc.name))
 				prog->compilation_error(j->t, "Variable %s shadows a parameter.", desc.name.c_str());
 
+			desc.type.is_lvalue = true;
 			layer[desc.name] = desc.type;
 
 			if (j->children.size() == 1)
@@ -149,7 +150,6 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 		}
 		else
 		{
-
 			if (ltype.base_type->is_array())
 			{
 				type_array *arr = dynamic_cast<type_array*>(ltype.base_type.get());
@@ -191,7 +191,9 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 		auto ltype = deduce_type(ast->children[0]);
 		auto rtype = deduce_type(ast->children[1]);
 		if (ltype.is_const)
-			prog->compilation_error(ast->t, "Const var is not a lvalue.");
+			prog->compilation_error(ast->t, "Const var cannot be assigned.");
+		if (!ltype.is_lvalue)
+			prog->compilation_error(ast->t, "Only lvalue can be assigned.");
 		if (!ltype.base_type->is_assignable_from(rtype.base_type))
 			prog->compilation_error(ast->t, "Type %s can not be assigned from type %s", ltype.base_type->id.c_str(), rtype.base_type->id.c_str());
 
@@ -214,15 +216,13 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 		else if (desc.op == "*")
 		{
 			if (type.base_type->is_array())
-			{
-				type_array *arr = dynamic_cast<type_array*>(type.base_type.get());
-				type.base_type = arr->to_pointer();
-			}
+				type = to_pointer(type);
 
 			if (type.base_type->is_pointer())
 			{
 				auto p = dynamic_cast<type_pointer*>(type.base_type.get());
 				ast->type = type_representation(p->get_base_type(), p->is_const(), false);
+				ast->type.is_lvalue = true;
 			}
 			else
 				prog->compilation_error(ast->t, "Only pointers can be dereferenced.");
@@ -293,9 +293,12 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 	}
 	else if (ast->desc.type() == typeid(descriptor_inc))
 	{
+		auto desc = any_cast<descriptor_inc>(ast->desc);
 		auto type = deduce_type(ast->children[0]);
-		if (!type.base_type->is_pointer() && !type.base_type->is_integral())
-			prog->compilation_error(ast->t, "Self-increasing only accepts integral and pointer.");
+		if (!type.is_lvalue)
+			prog->compilation_error(ast->t, "lvalue required as increment operand");
+		if (!desc.increase_first) // x++ is not a lvalue
+			type.is_lvalue = false;
 		return ast->type = type;
 	}
 	else if (ast->desc.type() == typeid(descriptor_primitive_cast))

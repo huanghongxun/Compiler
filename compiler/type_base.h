@@ -39,6 +39,7 @@ namespace compiler
 		bool is_const;
 		bool is_static;
 		bool is_built_in = false;
+		bool is_lvalue = false;
 
 		type_representation(type_base_ptr base_type, bool is_const, bool is_static);
 

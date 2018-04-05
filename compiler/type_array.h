@@ -26,4 +26,6 @@ namespace compiler
 	};
 
 	type_base_ptr create_array_type(type_base_ptr element_type, const vector<size_t> & dim);
+
+	type_representation to_pointer(type_representation array_type);
 }
