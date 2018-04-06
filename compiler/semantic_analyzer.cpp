@@ -6,6 +6,7 @@
 #include "type_array.h"
 #include "type_pointer.h"
 #include "syntax_tree_evaluation.h"
+#include <boost/algorithm/string.hpp>
 using namespace compiler;
 using namespace compiler::syntax;
 
@@ -186,6 +187,34 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 			}
 		}
 	}
+	else if (ast->desc.type() == typeid(descriptor_ternary))
+	{
+		auto test_type = deduce_type(ast->children[0]);
+		auto ltype = deduce_type(ast->children[1]);
+		auto rtype = deduce_type(ast->children[2]);
+
+		if (!test_type.base_type->is_integral() && !test_type.base_type->is_pointer())
+		{
+			auto bool_type = test_type.base_type->implicit_cast_with(test_type.base_type, type_int);
+			if (bool_type == nullptr)
+				prog->compilation_error(ast->t, "boolean expression required");
+			ast->children[0] = cast_node(ast->children[0], test_type, type_representation(type_int));
+		}
+
+		auto type = ltype.base_type->implicit_cast_with(ltype.base_type, rtype.base_type);
+		auto typer = type_representation(type, ltype.is_const || rtype.is_const, false);
+		if (type == nullptr)
+			prog->compilation_error(ast->t, "Type %s and type %s are incompatible", ltype.base_type->id.c_str(), rtype.base_type->id.c_str());
+		else
+		{
+			ast->type = type_representation(type);
+			if (*ltype.base_type != *type)
+				ast->children[0] = cast_node(ast->children[0], ltype, typer);
+			if (*rtype.base_type != *type)
+				ast->children[1] = cast_node(ast->children[1], rtype, typer);
+			return ast->type;
+		}
+	}
 	else if (ast->desc.type() == typeid(descriptor_assign))
 	{
 		auto ltype = deduce_type(ast->children[0]);
@@ -360,8 +389,15 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 	else if (ast->desc.type() == typeid(descriptor_if))
 	{
 		auto exp = deduce_type(ast->children[0]);
+
 		if (!exp.base_type->is_integral() && !exp.base_type->is_pointer())
-			prog->compilation_error(ast->t, "`if` only accept boolean expression");
+		{
+			auto bool_type = exp.base_type->implicit_cast_with(exp.base_type, type_int);
+			if (bool_type == nullptr)
+				prog->compilation_error(ast->t, "boolean expression required");
+			ast->children[0] = cast_node(ast->children[0], exp, type_representation(type_int));
+		}
+
 		deduce_type(ast->children[1]);
 		if (ast->children.size() == 3)
 			deduce_type(ast->children[2]);

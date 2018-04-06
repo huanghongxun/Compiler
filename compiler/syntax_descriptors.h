@@ -35,6 +35,12 @@ namespace compiler::syntax
 	// Children: Boolean Expression, Statements, Else-statements
 	class descriptor_if {};
 
+	// No Children
+	class descriptor_break {};
+
+	// No Children
+	class descriptor_continue {};
+
 	// Children: Boolean Expression, Statements
 	class descriptor_while {};
 
@@ -80,6 +86,9 @@ namespace compiler::syntax
 
 		descriptor_unary_operator(const string &op);
 	};
+
+	// Children: Boolean Expression, True Expression, False Expression
+	class descriptor_ternary {};
 
 	// Children: Callee, Args...
 	class descriptor_func_call

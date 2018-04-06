@@ -42,4 +42,20 @@ namespace compiler {
 
 		AST parse() override;
 	};
+
+	class parser_break : public parser
+	{
+	public:
+		explicit parser_break(syntax_analyzer *analyzer);
+
+		AST parse() override;
+	};
+
+	class parser_continue : public parser
+	{
+	public:
+		explicit parser_continue(syntax_analyzer *analyzer);
+
+		AST parse() override;
+	};
 }

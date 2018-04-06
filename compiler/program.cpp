@@ -6,6 +6,7 @@
 #include "string_utils.h"
 #include "compilation_error.h"
 #include <cstdarg>
+#include <boost/algorithm/string.hpp>
 using namespace std;
 
 compiler::program::program(const string &code) : code(code) {

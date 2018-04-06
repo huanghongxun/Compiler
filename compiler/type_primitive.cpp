@@ -17,7 +17,7 @@ bool compiler::type_primitive::is_primitive() const
 
 bool compiler::type_primitive::is_integral() const
 {
-	return priority < 200;
+	return 0 <= priority && priority < 200; // bool, char, short, int, long, long long
 }
 
 bool compiler::type_primitive::is_void() const

@@ -4,7 +4,7 @@
 #include "type_primitive.h"
 #include "string_utils.h"
 #include <boost/lexical_cast.hpp>
-
+#include <boost/algorithm/string.hpp>
 using namespace std;
 using namespace compiler;
 using namespace compiler::syntax;

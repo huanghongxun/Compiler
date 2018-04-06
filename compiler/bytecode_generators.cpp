@@ -586,3 +586,16 @@ void compiler::bytecode_inc::build(bytecode_appender & appender, AST ast)
 		appender.append(instruction_ptr(new instruction_pop()));
 	}
 }
+
+void compiler::bytecode_ternary::build(bytecode_appender & appender, AST ast)
+{
+	assert_eq(ast->children.size(), 3);
+
+	appender.build_expression(ast->children[0]);
+	int if_exp = appender.append(instruction_ptr());
+	appender.build_expression(ast->children[1]);
+	int else_exp = appender.append(instruction_ptr());
+	appender.modify(if_exp, instruction_ptr(new instruction_if(appender.get_current_instruction_number())));
+	appender.build_expression(ast->children[2]);
+	appender.modify(else_exp, instruction_ptr(new instruction_jump(appender.get_current_instruction_number())));
+}

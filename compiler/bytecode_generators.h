@@ -30,6 +30,12 @@ namespace compiler
 		void build(bytecode_appender &appender, AST ast) override;
 	};
 
+	class bytecode_ternary : public bytecode_generator_base
+	{
+	public:
+		void build(bytecode_appender &appender, AST ast) override;
+	};
+
 	class bytecode_binary_operator : public bytecode_generator_base
 	{
 	public:

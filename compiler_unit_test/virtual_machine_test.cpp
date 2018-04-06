@@ -14,6 +14,9 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 #include "../compiler/bytecode_generator.h"
 #include "../compiler/virtual_machine.h"
 
+#include <boost/wave.hpp>
+#include <boost/wave/cpplexer/cpp_lex_iterator.hpp>
+
 using namespace compiler;
 
 void _assert_eq(int a, int b)
@@ -64,7 +67,8 @@ TEST_CLASS(VirtualMachineTest)
 {
 public:
 
-	TEST_METHOD(test_vm_digit_dec) {
+	TEST_METHOD(test_vm_digit_dec)
+	{
 		test("int main()\n"
 			"{\n"
 			"assert(3, 3); assert_neq(5, 4);\n"
@@ -72,7 +76,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_digit_hex) {
+	TEST_METHOD(test_vm_digit_hex)
+	{
 		test("int main()\n"
 			"{\n"
 			"assert(0x10, 16); assert_neq(0x11, 16);\n"
@@ -80,7 +85,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_digit_oct) {
+	TEST_METHOD(test_vm_digit_oct)
+	{
 		test("int main()\n"
 			"{\n"
 			"assert(010, 8); assert_neq(011, 8);\n"
@@ -88,7 +94,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_cast_primitive) {
+	TEST_METHOD(test_vm_cast_primitive)
+	{
 		test("int main()\n"
 			"{\n"
 			"assert((int) 2.1, 2);\n"
@@ -96,7 +103,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_cast_pointer) {
+	TEST_METHOD(test_vm_cast_pointer)
+	{
 		test("int main()\n"
 			"{\n"
 			"float f = 23.0;\n"
@@ -105,7 +113,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_digit_double) {
+	TEST_METHOD(test_vm_digit_double)
+	{
 		test("int main()\n"
 			"{\n"
 			"double d = 2.1;\n"
@@ -116,7 +125,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_digit_scientific) {
+	TEST_METHOD(test_vm_digit_scientific)
+	{
 		test("int main()\n"
 			"{\n"
 			"assert_eq_double(1e2, 100.0);\n"
@@ -124,7 +134,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_global_int_var) {
+	TEST_METHOD(test_vm_global_int_var)
+	{
 		test("int i = 8;\n"
 			"int main()\n"
 			"{\n"
@@ -134,7 +145,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_static_var) {
+	TEST_METHOD(test_vm_static_var)
+	{
 		test("int test() {\n"
 			"    static int i = 1;\n"
 			"	 return ++i;\n"
@@ -147,7 +159,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_global_array) {
+	TEST_METHOD(test_vm_global_array)
+	{
 		test("int arr[10];\n"
 			"int main()\n"
 			"{\n"
@@ -157,7 +170,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_fibonacci) {
+	TEST_METHOD(test_vm_fibonacci)
+	{
 		test("int arr[10];\n"
 			"int main()\n"
 			"{\n"
@@ -177,7 +191,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_two_dim_array) {
+	TEST_METHOD(test_vm_two_dim_array)
+	{
 		test("int arr[10][10];\n"
 			"int main()\n"
 			"{\n"
@@ -190,7 +205,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_sizeof) {
+	TEST_METHOD(test_vm_sizeof)
+	{
 		test("double arr[10][10];\n"
 			"int main()\n"
 			"{\n"
@@ -201,7 +217,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_global_simple_pointer) {
+	TEST_METHOD(test_vm_global_simple_pointer)
+	{
 		test("int main()\n"
 			"{\n"
 			"int i = 2;\n"
@@ -210,7 +227,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_global_pointer_move) {
+	TEST_METHOD(test_vm_global_pointer_move)
+	{
 		test("int main()\n"
 			"{\n"
 			"int i = 2, j = 4, k = 7; double a = 2.5, b = 3.2e-1, c = 4.4 / 2;\n"
@@ -229,7 +247,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_simple_func) {
+	TEST_METHOD(test_vm_simple_func)
+	{
 		test("int test() { return 1 + 1; }\n"
 			"int main()\n"
 			"{\n"
@@ -238,7 +257,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_func_arg) {
+	TEST_METHOD(test_vm_func_arg)
+	{
 		test("int test(int i) { return i * 2; }\n"
 			"int main()\n"
 			"{\n"
@@ -247,7 +267,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_func_recursive) {
+	TEST_METHOD(test_vm_func_recursive)
+	{
 		test("int factorial(int i)\n"
 			"{\n"
 			"    if (i == 0) return 1; \n"
@@ -260,7 +281,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_comma_expression) {
+	TEST_METHOD(test_vm_comma_expression)
+	{
 		test("int main()\n"
 			"{\n"
 			"    int i;\n"
@@ -270,7 +292,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_if_else) {
+	TEST_METHOD(test_vm_if_else)
+	{
 		test("int main()\n"
 			"{\n"
 			"    int i = 2;\n"
@@ -283,7 +306,8 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_for) {
+	TEST_METHOD(test_vm_for)
+	{
 		test("int factorial(int i)\n"
 			"{\n"
 			"    if (i == 0) return 1; \n"
@@ -298,7 +322,19 @@ public:
 			"}");
 	}
 
-	TEST_METHOD(test_vm_no_built_in) {
+
+	TEST_METHOD(test_vm_ternary_conditional)
+	{
+		test("int main()\n"
+			"{\n"
+			"    assert(1, 1 == 1 ? 1 : 0);\n"
+			"    assert(0, 1 == 0 ? 1 : 0);\n"
+			"    return 0;\n"
+			"}");
+	}
+
+	TEST_METHOD(test_vm_no_built_in)
+	{
 		Assert::ExpectException<built_in_function_not_found>([]() {
 			test("#include <iostream>\n"
 				"#include <utility>\n"
@@ -318,5 +354,58 @@ public:
 				"    return 0;\n"
 				"}");
 		});
+	}
+
+	TEST_METHOD(test_vm_preprocessor)
+	{
+		/*string code =
+			"#include <stdio.h>\n"
+			"// this is a line comment\n"
+			"int i;\n"
+			"double d;\n"
+			"int main() {\n"
+			"    int local;\n"
+			"    scanf(\"%d \\n \\t \\f \", &local);\n"
+			"    printf(\"%d\", local);\n"
+			"    return 0;\n"
+			"}\n";*/
+
+		string code = "#include <stdio.h>\n"
+			"int main()\n"
+			"{\n"
+			"    assert(1, 1 == 1 ? 1 : 0);\n"
+			"    assert(0, 1 == 0 ? 1 : 0);\n"
+			"    return 0;\n"
+			"}\n";
+
+		typedef boost::wave::cpplexer::lex_iterator<boost::wave::cpplexer::lex_token<>> lex_iterator_type;
+		typedef boost::wave::context<string::iterator, lex_iterator_type> context_type;
+
+		context_type ctx(code.begin(), code.end(), "main.cpp");
+		ctx.add_sysinclude_path(".");
+
+		stringstream ss;
+		for (auto it = ctx.begin(); it != ctx.end(); it++)
+			ss << (*it).get_value();
+
+		code = ss.str();
+
+		program_ptr p = make_shared<program>(code);
+		lexical_analyzer analyzer(p);
+		auto res = analyzer.analyze();
+		syntax_analyzer sa(p, res);
+		auto tree = sa.analyze();
+		semantic_analyzer sem(p);
+		sem.analyze(tree);
+		bytecode_generator generator(p);
+		virtual_machine vm(generator.build(tree));
+
+		vm.register_built_in_func("assert", shared_ptr<built_in_function>(new built_in_function_2<void, int, int>(_assert_eq)));
+		vm.register_built_in_func("assert_neq", shared_ptr<built_in_function>(new built_in_function_2<void, int, int>(_assert_neq)));
+		vm.register_built_in_func("assert_eq_double", shared_ptr<built_in_function>(new built_in_function_2<void, double, double>(_assert_eq_double)));
+		vm.register_built_in_func("assert_neq_double", shared_ptr<built_in_function>(new built_in_function_2<void, double, double>(_assert_neq_double)));
+
+		vm.init();
+		vm.start();
 	}
 };

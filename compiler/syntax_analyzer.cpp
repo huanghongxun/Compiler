@@ -418,6 +418,15 @@ compiler::AST compiler::syntax_analyzer::parse_unit16()
 		ast->add_children(parse_unit16());
 		return ast;
 	}
+	else if (peek_token("?")) // Ternary conditional
+	{
+		AST ast = make_shared<syntax_tree>(descriptor_ternary(), next_token());
+		ast->add_children(left);
+		ast->add_children(parse_unit16());
+		assert_next_token(":");
+		ast->add_children(parse_unit16());
+		return ast;
+	}
 	else
 	{
 		return left;
@@ -539,6 +548,8 @@ compiler::syntax_analyzer::syntax_analyzer(program_ptr prog, vector<token> token
 	parsers.emplace_back(new parser_for(this));
 	parsers.emplace_back(new parser_while(this));
 	parsers.emplace_back(new parser_return(this));
+	parsers.emplace_back(new parser_break(this));
+	parsers.emplace_back(new parser_continue(this));
 
 	register_type(type_int);
 	register_type(type_long);

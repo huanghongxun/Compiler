@@ -119,3 +119,39 @@ compiler::AST compiler::parser_return::parse()
 
 	return ast;
 }
+
+compiler::parser_break::parser_break(syntax_analyzer * analyzer)
+	: parser(analyzer)
+{
+}
+
+compiler::AST compiler::parser_break::parse()
+{
+	if (!m_syntax_analyzer->peek_token("break"))
+		return nullptr;
+
+	AST ast = make_shared<syntax_tree>(descriptor_break(), m_syntax_analyzer->peek_token_with_code_info());
+
+	m_syntax_analyzer->assert_next_token("break");
+	m_syntax_analyzer->assert_next_token(";");
+
+	return ast;
+}
+
+compiler::parser_continue::parser_continue(syntax_analyzer * analyzer)
+	: parser(analyzer)
+{
+}
+
+compiler::AST compiler::parser_continue::parse()
+{
+	if (!m_syntax_analyzer->peek_token("continue"))
+		return nullptr;
+
+	AST ast = make_shared<syntax_tree>(descriptor_continue(), m_syntax_analyzer->peek_token_with_code_info());
+
+	m_syntax_analyzer->assert_next_token("continue");
+	m_syntax_analyzer->assert_next_token(";");
+
+	return ast;
+}

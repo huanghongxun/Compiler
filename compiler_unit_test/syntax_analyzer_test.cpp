@@ -92,6 +92,15 @@ public:
 				"return 0;\n"
 				"}");
 		});
+		Assert::ExpectException<compilation_error>([this]() {
+			test("int arr[10][10];\n"
+				"int main()\n"
+				"{\n"
+				"int i;\n"
+				"*arr = &i;\n"
+				"return 0;\n"
+				"}");
+		});
 	}
 
 	TEST_METHOD(test_syntax_analyzer_increment_lvalue) {

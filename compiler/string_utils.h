@@ -3,9 +3,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <sstream>
 #include <cstdio>
-#include <boost/algorithm/string.hpp>
 
 template<typename ... Args>
 std::string string_format(const std::string& format, Args ... args)

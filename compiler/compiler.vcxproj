@@ -163,12 +163,17 @@
     <ClInclude Include="function_executor.h" />
     <ClInclude Include="instruction.h" />
     <ClInclude Include="instructions.h" />
+    <ClInclude Include="lexical\composition\composition.h" />
+    <ClInclude Include="lexical\composition\exclusive_or.h" />
+    <ClInclude Include="lexical\parser.h" />
     <ClInclude Include="lexical_analyzer.h" />
     <ClInclude Include="local_variable_table.h" />
+    <ClInclude Include="macro_definition.h" />
     <ClInclude Include="object_t.h" />
     <ClInclude Include="operand_stack.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="parsers.h" />
+    <ClInclude Include="preprocessor.h" />
     <ClInclude Include="primitive_cast.h" />
     <ClInclude Include="program.h" />
     <ClInclude Include="semantic_analyzer.h" />
@@ -180,6 +185,7 @@
     <ClInclude Include="syntax_tree_evaluation.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="token.h" />
+    <ClInclude Include="tokens.h" />
     <ClInclude Include="type_array.h" />
     <ClInclude Include="type_base.h" />
     <ClInclude Include="type_pointer.h" />
@@ -206,10 +212,12 @@
     <ClCompile Include="instructions.cpp" />
     <ClCompile Include="lexical_analyzer.cpp" />
     <ClCompile Include="local_variable_table.cpp" />
+    <ClCompile Include="macro_definition.cpp" />
     <ClCompile Include="object_t.cpp" />
     <ClCompile Include="operand_stack.cpp" />
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="parsers.cpp" />
+    <ClCompile Include="preprocessor.cpp" />
     <ClCompile Include="primitive_cast.cpp" />
     <ClCompile Include="program.cpp" />
     <ClCompile Include="semantic_analyzer.cpp" />
@@ -225,6 +233,7 @@
     <ClCompile Include="syntax_tree.cpp" />
     <ClCompile Include="syntax_tree_evaluation.cpp" />
     <ClCompile Include="token.cpp" />
+    <ClCompile Include="tokens.cpp" />
     <ClCompile Include="type_array.cpp" />
     <ClCompile Include="type_base.cpp" />
     <ClCompile Include="type_pointer.cpp" />

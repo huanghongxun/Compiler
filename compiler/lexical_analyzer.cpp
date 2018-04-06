@@ -5,10 +5,12 @@
 #include <iostream>
 
 compiler::lexical_analyzer::lexical_analyzer(program_ptr prog)
-        : prog(prog), code(prog->get_code()) {
+        : prog(prog), code(prog->get_code())
+{
 }
 
-std::vector<compiler::token> compiler::lexical_analyzer::analyze() {
+std::vector<compiler::token> compiler::lexical_analyzer::analyze()
+{
     std::vector<token> result;
     token t;
     while (t = next_token(), !t.code.empty())
@@ -16,18 +18,21 @@ std::vector<compiler::token> compiler::lexical_analyzer::analyze() {
     return result;
 }
 
-int compiler::lexical_analyzer::next_char() {
+int compiler::lexical_analyzer::next_char()
+{
     int ch = cur < (int) code.size() ? (line_column++, code[cur++]) : EOF;
 	if (ch == '\n')
 		line_number++, line_column = 0;
     return ch;
 }
 
-int compiler::lexical_analyzer::peek_char(int offset) {
+int compiler::lexical_analyzer::peek_char(int offset)
+{
     return cur + offset < (int) code.size() ? code[cur + offset] : EOF;
 }
 
-compiler::token compiler::lexical_analyzer::next_token() {
+compiler::token compiler::lexical_analyzer::next_token()
+{
     string token;
     int c = next_char();
     while (isspace(c)) c = next_char();
