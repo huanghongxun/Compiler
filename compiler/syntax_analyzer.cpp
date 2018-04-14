@@ -4,7 +4,7 @@
 
 #include "syntax_analyzer.h"
 #include "syntax_descriptors.h"
-#include "parsers.h"
+#include "syntax_parsers.h"
 #include "unit_assert.h"
 #include "type_primitive.h"
 #include "utility.h"

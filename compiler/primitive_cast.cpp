@@ -23,8 +23,8 @@ compiler::instruction_ptr compiler::cast_primitive(type_base_ptr from_type, type
 		return cast_primitive0<short>(from_type);
 	else if (to_type->is_pointer())
 	{
-		assert_cond(from_type->is_pointer());
-		return instruction_ptr(new instruction_pointer_cast(from_type, to_type));
+		// no need to convert void*
+		return instruction_ptr();
 	}
 	else
 		throw std::runtime_error(string_format("primitive cast does not support type %s", to.c_str()));

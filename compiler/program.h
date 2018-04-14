@@ -18,10 +18,10 @@ namespace compiler {
 
         const string get_code() const;
 
-		template<typename ... Args>
-		NORETURN void compilation_error(const token &t, const char *fmt, Args... args)
+		template<typename _Position, typename ... Args>
+		NORETURN void compilation_error(_Position const& t, const char *fmt, Args... args)
 		{
-			compilation_error_impl(t.line_number, t.line_column, fmt, args...);
+			compilation_error_impl(t.line, t.column, fmt, args...);
 			throw compiler::compilation_error(string_format(fmt, args...).c_str());
 		}
 

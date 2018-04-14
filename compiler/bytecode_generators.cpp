@@ -544,7 +544,9 @@ void compiler::bytecode_primitive_cast::build(bytecode_appender & appender, AST 
 	auto desc = any_cast<descriptor_primitive_cast>(ast->desc);
 	assert_eq(ast->children.size(), 1);
 	appender.build_expression(ast->children[0]);
-	appender.append(cast_primitive(desc.from_type.base_type, desc.to_type.base_type));
+	auto ins = cast_primitive(desc.from_type.base_type, desc.to_type.base_type);
+	if (ins != nullptr)
+		appender.append(ins);
 }
 
 void build_inc(bytecode_appender & appender, const string &type_name, int delta)

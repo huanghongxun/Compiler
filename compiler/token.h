@@ -28,8 +28,8 @@ namespace compiler
 		token(string code, int line_number, int line_column);
 
         string code;
-        int line_number;
-		int line_column;
+        int line;
+		int column;
 		token_source_t source = token_source_t::text;
 
         bool eof();

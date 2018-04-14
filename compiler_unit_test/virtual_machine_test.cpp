@@ -14,9 +14,6 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 #include "../compiler/bytecode_generator.h"
 #include "../compiler/virtual_machine.h"
 
-#include <boost/wave.hpp>
-#include <boost/wave/cpplexer/cpp_lex_iterator.hpp>
-
 using namespace compiler;
 
 void _assert_eq(int a, int b)
@@ -355,21 +352,9 @@ public:
 				"}");
 		});
 	}
-
+	/*
 	TEST_METHOD(test_vm_preprocessor)
 	{
-		/*string code =
-			"#include <stdio.h>\n"
-			"// this is a line comment\n"
-			"int i;\n"
-			"double d;\n"
-			"int main() {\n"
-			"    int local;\n"
-			"    scanf(\"%d \\n \\t \\f \", &local);\n"
-			"    printf(\"%d\", local);\n"
-			"    return 0;\n"
-			"}\n";*/
-
 		string code = "#include <stdio.h>\n"
 			"int main()\n"
 			"{\n"
@@ -407,5 +392,5 @@ public:
 
 		vm.init();
 		vm.start();
-	}
+	}*/
 };

@@ -1,10 +1,10 @@
-#include "parsers.h"
+#include "syntax_parsers.h"
 #include "syntax_descriptors.h"
 
 using namespace compiler::syntax;
 
 compiler::parser_if::parser_if(syntax_analyzer * analyzer)
-	: parser(analyzer)
+	: syntax_parser(analyzer)
 {
 }
 
@@ -41,7 +41,7 @@ compiler::AST compiler::parser_for::parse_for1() {
 }
 
 compiler::parser_for::parser_for(syntax_analyzer * analyzer)
-	: parser(analyzer)
+	: syntax_parser(analyzer)
 {
 }
 
@@ -81,7 +81,7 @@ compiler::AST compiler::parser_for::parse() {
 }
 
 compiler::parser_while::parser_while(syntax_analyzer * analyzer)
-	: parser(analyzer)
+	: syntax_parser(analyzer)
 {
 }
 
@@ -102,7 +102,7 @@ compiler::AST compiler::parser_while::parse()
 }
 
 compiler::parser_return::parser_return(syntax_analyzer * analyzer)
-	: parser(analyzer)
+	: syntax_parser(analyzer)
 {
 }
 
@@ -121,7 +121,7 @@ compiler::AST compiler::parser_return::parse()
 }
 
 compiler::parser_break::parser_break(syntax_analyzer * analyzer)
-	: parser(analyzer)
+	: syntax_parser(analyzer)
 {
 }
 
@@ -139,7 +139,7 @@ compiler::AST compiler::parser_break::parse()
 }
 
 compiler::parser_continue::parser_continue(syntax_analyzer * analyzer)
-	: parser(analyzer)
+	: syntax_parser(analyzer)
 {
 }
 

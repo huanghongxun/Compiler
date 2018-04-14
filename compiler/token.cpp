@@ -10,7 +10,7 @@ compiler::token::token()
 }
 
 compiler::token::token(string code, int line_number, int line_column)
-	: code(move(code)), line_number(line_number), line_column(line_column)
+	: code(move(code)), line(line_number), column(line_column)
 {
 }
 

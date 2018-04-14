@@ -419,13 +419,4 @@ namespace compiler::instructions
 		}
 	};
 
-	struct instruction_pointer_cast : public instruction
-	{
-		type_representation from_type, to_type;
-
-		instruction_pointer_cast(type_representation from_type, type_representation to_type);
-
-		void operate(function_environment& env) override;
-	};
-
 }

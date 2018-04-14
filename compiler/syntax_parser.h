@@ -6,12 +6,12 @@
 namespace compiler {
 	class syntax_analyzer;
 
-    class parser {
+    class syntax_parser {
 	protected:
         syntax_analyzer *m_syntax_analyzer;
 
     public:
-        explicit parser(syntax_analyzer *analyzer);
+        explicit syntax_parser(syntax_analyzer *analyzer);
 
         virtual AST parse() = 0;
     };

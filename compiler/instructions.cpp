@@ -123,17 +123,8 @@ void compiler::instructions::instruction_move::operate(function_environment & en
 
 	int offset = op2.value.cast<int>() * (move_positive ? 1 : -1);
 
-	auto e = operand_stack_element((void*)((char*)op1.value.cast<void*>() + offset * (long long) sz));
+	auto e = operand_stack_element((void*)((char*)op1.value.cast<void*>() + offset * (long long)sz));
 	env.stack->push(e);
-}
-
-compiler::instructions::instruction_pointer_cast::instruction_pointer_cast(type_representation from_type, type_representation to_type)
-	: from_type(from_type), to_type(to_type)
-{
-}
-
-void compiler::instructions::instruction_pointer_cast::operate(function_environment & env)
-{
 }
 
 compiler::instructions::instruction_load_array::instruction_load_array(type_base_ptr type, int index, bool is_static)

@@ -8,20 +8,20 @@
 #include "token.h"
 #include "program.h"
 #include "syntax_tree.h"
-#include "parser.h"
+#include "syntax_parser.h"
 
 namespace compiler
 {
 	using namespace std;
 
-	class parser;
+	class syntax_parser;
 
     class syntax_analyzer
 	{
         program_ptr prog;
         vector<token> tokens;
         int ptr = 0;
-		vector<unique_ptr<parser>> parsers;
+		vector<unique_ptr<syntax_parser>> parsers;
 
 		map<string, type_representation> types;
 		void register_type(type_base_ptr type);
