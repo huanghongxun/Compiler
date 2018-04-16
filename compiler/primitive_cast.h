@@ -35,5 +35,8 @@ namespace compiler
 			throw std::runtime_error(string_format("primitive cast does not support type %s", from.c_str()));
 	}
 
+	template<>
+	instruction_ptr cast_primitive0<void*>(type_base_ptr from_type);
+
 	instruction_ptr cast_primitive(type_base_ptr from_type, type_base_ptr to_type);
 }

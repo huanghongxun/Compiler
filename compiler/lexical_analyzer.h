@@ -5,6 +5,8 @@
 #include <vector>
 #include <cctype>
 #include "string_utils.h"
+#include "tokens.h"
+#include "lexical/lexical.h"
 #include <iostream>
 
 namespace compiler
@@ -12,12 +14,12 @@ namespace compiler
 	template<typename _String, typename _Position, typename _Iterator = typename _String::iterator>
 	struct lexical_iterator
 	{
-		lexical_iterator(_String str, size_t tab)
-			: now(str.begin()), end(str.end()), tab(tab), pos{1, 1}
+		lexical_iterator(_String file, _String str, size_t tab)
+			: now(str.begin()), end(str.end()), tab(tab), pos{ file, 1, 1 }
 		{}
 
-		lexical_iterator(_Iterator now, _Iterator end, size_t tab)
-			: now(now), end(end), tab(tab), pos{ 1, 1 }
+		lexical_iterator(_String file, _Iterator now, _Iterator end, size_t tab)
+			: now(now), end(end), tab(tab), pos{ file, 1, 1 }
 		{}
 
 		lexical_iterator(_Iterator now, _Iterator end, _Position pos, size_t tab)
@@ -129,14 +131,57 @@ namespace compiler
 
 	struct simple_position
 	{
+		string file;
 		int line, column;
 	};
 
-    class lexical_analyzer
+	using namespace compiler::parser;
+
+	enum class lexical_grammar_id
 	{
-    public:
+		root,
+		space
+	};
+
+    struct lexical_analyzer : public grammar<lexical_analyzer>
+	{
+
+		template<typename _Scanner>
+		struct definition
+		{
+			typedef rule<_Scanner, parser_context<>, dynamic_parser_tag> rule_type;
+
+			rule_type lexical_grammar, qualified_name;
+			rule_type int_lit;
+			rule_type ppsp;
+
+			definition(lexical_analyzer const& self)
+			{
+				lexical_grammar.set_id(lexical_grammar_id::root);
+				ppsp.set_id(lexical_grammar_id::space);
+
+				qualified_name =
+					ch_p(token_id::colon_colon) ||
+					(no_node_d[*ppsp] >> list_p((ch_p(token_id::identifier) | pattern_p(token_category::keyword, token_category::token_type_mask)), no_node_d[*ppsp] >> ch_p(token_id::colon_colon) >> no_node_d[*ppsp]));
+
+				lexical_grammar = (
+					(ch_p('"') >> *(escaped_ch_p - ch_p('"')) >> '"') | // string constant
+					(ch_p('\'') >> escaped_ch_p - ch_p('\'') >> '\'') | // char constant
+					(int_p >> !(as_lower_d[str_p("l")] | as_lower_d[str_p("ll")])) | // int constant
+					(real_p >> !(as_lower_d[str_p("f")] | as_lower_d[str_p("l")])) | // float constant
+					ch_p('{') |
+					ch_p('}') |
+					ch_p('[') |
+					ch_p(']') |
+					qualified_name
+					);
+
+				ppsp = ch_p(token_id::space) | ch_p(token_id::block_comment);
+			}
+		};
+
         explicit lexical_analyzer(program_ptr prog)
-			: prog(prog), code(prog->get_code()), begin(code.begin(), code.end(), 4), end(code.end(), code.end(), 4)
+			: prog(prog), code(prog->get_code()), begin(prog->get_file(), code.begin(), code.end(), 4), end(prog->get_file(), code.end(), code.end(), 4)
 		{
 		}
 

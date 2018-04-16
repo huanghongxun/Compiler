@@ -20,6 +20,9 @@ AST cast_node(AST ast, type_representation from_type, type_representation to_typ
 
 AST assign_cast_node(AST ast, type_representation from_type, type_representation to_type)
 {
+	if (from_type.base_type->is_pointer() && to_type.base_type->is_pointer())
+		return ast;
+
 	AST cast_ast(new syntax_tree(descriptor_primitive_cast(to_type, from_type), ast->t));
 	cast_ast->type = to_type;
 	cast_ast->add_children(ast);
@@ -217,19 +220,36 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 	}
 	else if (ast->desc.type() == typeid(descriptor_assign))
 	{
+		auto desc = any_cast<descriptor_assign>(ast->desc);
 		auto ltype = deduce_type(ast->children[0]);
 		auto rtype = deduce_type(ast->children[1]);
 		if (ltype.is_const)
 			prog->compilation_error(ast->t, "Const var cannot be assigned.");
 		if (!ltype.is_lvalue)
 			prog->compilation_error(ast->t, "Only lvalue can be assigned.");
-		if (!ltype.base_type->is_assignable_from(rtype.base_type))
-			prog->compilation_error(ast->t, "Type %s can not be assigned from type %s", ltype.base_type->id.c_str(), rtype.base_type->id.c_str());
 
-		if (*ltype.base_type != *rtype.base_type)
-			ast->children[1] = assign_cast_node(ast->children[1], rtype, ltype);
+		if (ltype.base_type->is_pointer() && desc.op != "=")
+		{
+			if (!rtype.base_type->is_integral())
+				prog->compilation_error(ast->t, "Only integral is accepted here.");
+			else if (desc.op != "+=" && desc.op != "-=")
+				prog->compilation_error(ast->t, "Pointers can only add or subtract.");
+			else
+			{
+				ast->type = ltype;
+				return ast->type;
+			}
+		}
+		else
+		{
+			if (!ltype.base_type->is_assignable_from(rtype.base_type))
+				prog->compilation_error(ast->t, "Type %s can not be assigned from type %s", ltype.base_type->id.c_str(), rtype.base_type->id.c_str());
 
-		return ast->type = ltype;
+			if (*ltype.base_type != *rtype.base_type)
+				ast->children[1] = assign_cast_node(ast->children[1], rtype, ltype);
+
+			return ast->type = ltype;
+		}
 	}
 	else if (ast->desc.type() == typeid(descriptor_unary_operator))
 	{

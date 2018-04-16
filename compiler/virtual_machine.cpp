@@ -2,13 +2,24 @@
 #include "built_in_functions.h"
 #include "function_environment.h"
 #include "unit_assert.h"
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
 
 void compiler::virtual_machine::init_built_in_func()
 {
 	built_in_func["assert"] = shared_ptr<built_in_function>(new built_in_assert());
-	built_in_func["putchar"] = shared_ptr<built_in_function>(new built_in_putchar());
-	built_in_func["malloc"] = shared_ptr<built_in_function>(new built_in_malloc());
-	built_in_func["free"] = shared_ptr<built_in_function>(new built_in_free());
+	built_in_func["putchar"] = shared_ptr<built_in_function>(new built_in_function_1<int, int>(putchar));
+	built_in_func["malloc"] = shared_ptr<built_in_function>(new built_in_function_1<void*, size_t>(malloc));
+	built_in_func["free"] = shared_ptr<built_in_function>(new built_in_function_1<void, void*>(free));
+	built_in_func["memset"] = shared_ptr<built_in_function>(new built_in_function_3<void*, void*, int, size_t>(memset));
+	built_in_func["memcpy"] = shared_ptr<built_in_function>(new built_in_function_3<void*, void*, void const*, size_t>(memcpy));
+	built_in_func["strcmp"] = shared_ptr<built_in_function>(new built_in_function_2<int, const char*, const char*>(strcmp));
+	built_in_func["strlen"] = shared_ptr<built_in_function>(new built_in_function_1<size_t, const char*>(strlen));
+	built_in_func["puts"] = shared_ptr<built_in_function>(new built_in_function_1<int, const char*>(puts));
+	built_in_func["system"] = shared_ptr<built_in_function>(new built_in_function_1<int, const char*>(system));
+	built_in_func["printf"] = shared_ptr<built_in_function>(new built_in_printf());
+	built_in_func["scanf"] = shared_ptr<built_in_function>(new built_in_scanf());
 }
 
 compiler::virtual_machine::virtual_machine(const bytecode & code)
@@ -41,7 +52,7 @@ object_t compiler::virtual_machine::execute_function(const string & func_name, c
 			throw built_in_function_not_found(func_name);
 	}
 
-	assert_eq(args.size(), func->arg_num());
+	assert_cond(args.size() >= func->fixed_arg_size);
 
 	size_t arg_size = 0;
 
@@ -53,8 +64,12 @@ object_t compiler::virtual_machine::execute_function(const string & func_name, c
 
 	function_environment env(this, &table, &global, &stack);
 
+	size_t ind = func->local_size;
 	for (size_t i = 0; i < args.size(); ++i)
-		table.set(func->get_arg_indexes()[i], args[i].get_raw_memory(), args[i].get_raw_memory_size());
+	{
+		table.set(ind, args[i].get_raw_memory(), args[i].get_raw_memory_size());
+		ind += args[i].get_raw_memory_size();
+	}
 
 	auto ins = func->get_instructions();
 	for (size_t i = 0; i < ins.size(); )

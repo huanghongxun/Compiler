@@ -24,7 +24,7 @@ public:
 			"	 return 0;\n"
 			"}";
 
-		program_ptr p = make_shared<program>(code);
+		program_ptr p = make_shared<program>("main.cpp", code);
 		lexical_analyzer analyzer(p);
 		auto res = analyzer.analyze();
 		syntax_analyzer sa(p, res);

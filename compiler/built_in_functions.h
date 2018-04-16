@@ -28,4 +28,28 @@ namespace compiler
 	public:
 		built_in_free();
 	};
+
+	class built_in_scanf : public built_in_function
+	{
+	public:
+		object_t call(const std::vector<object_t> &vec) override;
+	};
+
+	class built_in_printf : public built_in_function
+	{
+	public:
+		object_t call(const std::vector<object_t> &vec) override;
+	};
+
+	class built_in_puts : public built_in_function_1<int, void*>
+	{
+	public:
+		built_in_puts();
+	};
+
+	class built_in_system : public built_in_function_1<int, void*>
+	{
+	public:
+		built_in_system();
+	};
 }

@@ -38,7 +38,7 @@ void _assert_neq_double(double a, double b)
 
 void test(const string &code)
 {
-	program_ptr p = make_shared<program>("void __built_in assert(int a, int b);\n"
+	program_ptr p = make_shared<program>("main.cpp", "void __built_in assert(int a, int b);\n"
 		"void __built_in assert_neq(int a, int b);\n"
 		"void __built_in assert_eq_double(double a, double b);\n"
 		"void __built_in assert_neq_double(double a, double b);\n" + code);
@@ -326,6 +326,19 @@ public:
 			"{\n"
 			"    assert(1, 1 == 1 ? 1 : 0);\n"
 			"    assert(0, 1 == 0 ? 1 : 0);\n"
+			"    return 0;\n"
+			"}");
+	}
+
+
+	TEST_METHOD(test_vm_basic_str)
+	{
+		test("int main()\n"
+			"{\n"
+			"    char const *c = \"%d\";\n"
+			"    assert('%', c[0]);\n"
+			"    assert('d', c[1]);\n"
+			"    assert(0, c[2]);\n"
 			"    return 0;\n"
 			"}");
 	}

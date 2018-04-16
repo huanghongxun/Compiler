@@ -12,11 +12,10 @@ namespace compiler {
 
     class program {
     public:
-        explicit program(const string &code);
+        explicit program(const string &file, const string &code);
 
-        program(initializer_list<string> args);
-
-        const string get_code() const;
+		const string get_code() const;
+		const string get_file() const;
 
 		template<typename _Position, typename ... Args>
 		NORETURN void compilation_error(_Position const& t, const char *fmt, Args... args)
@@ -34,6 +33,7 @@ namespace compiler {
 
     private:
         string code;
+		string file;
 
 		NORETURN void compilation_error_impl(int line_number, int line_column, const char *fmt, ...);
     };

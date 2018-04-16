@@ -3,12 +3,13 @@
 #include <locale>
 #include <limits>
 #include "../parser.h"
+#include "../utility/numerics.h"
 #include "../composition/composition.h"
 
 namespace compiler::parser
 {
 	template<typename _Char, typename _Scanner, typename _Parser>
-	void parse_escape_char(_Scanner const& scan, _Parser &parser)
+	void parse_escape_char_action(_Scanner const& scan, _Parser &parser)
 	{
 		if (!scan.at_end())
 		{
@@ -102,6 +103,24 @@ namespace compiler::parser
 		return scan.no_match();
 	}
 
+	template<typename _Char, typename _Scanner, typename _Parser>
+	typename parser_result<_Parser, _Scanner>::type
+		parse_escape_char(_Scanner const& scan, _Parser const&)
+	{
+		typedef uint_parser<_Char, 8, 1, numeric_limits<_Char>::digits / 3 + 1> oct_parser;
+		typedef uint_parser<_Char, 16, 1, numeric_limits<_Char>::digits / 4 + 1> oct_parser;
+
+		static auto p = (
+			(any_p - ch_p<_Char>('\\'))
+			| (ch_p<_Char>('\\') >>
+			(oct_parser()
+				| as_lower_d[ch_p<_Char>('x')] >> hex_parser()
+				| (any_p - as_lower_d[ch_p<_Char>('x')] - oct_parser()))
+				)
+			);
+		return p.parse(scan);
+	}
+
 	template<typename _Char, typename _Parser, typename _Action>
 	struct escape_char_action : public unary_operator<_Parser, parser<escape_char_action<_Char, _Parser, _Action>>>
 	{
@@ -114,7 +133,7 @@ namespace compiler::parser
 		typename parser_result<self_type, _Scanner>::type
 			parse(_Scanner const& scan) const
 		{
-			parse_escape_char<_Char>(scan, parser);
+			return parse_escape_char_action<_Char>(scan, parser);
 		}
 
 		_Action predicate() const { return actor; }
@@ -141,4 +160,6 @@ namespace compiler::parser
 			return parse_escape_char<_Char>(scan, *this);
 		}
 	};
+
+	const escape_char_parser<char> escaped_ch_p = escape_char_parser<char>();
 }

@@ -86,7 +86,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -163,6 +163,8 @@
     <ClInclude Include="function_executor.h" />
     <ClInclude Include="instruction.h" />
     <ClInclude Include="instructions.h" />
+    <ClInclude Include="lexical\actor\ref_actor.h" />
+    <ClInclude Include="lexical\actor\actors.h" />
     <ClInclude Include="lexical\as_parser.h" />
     <ClInclude Include="lexical\composition\action.h" />
     <ClInclude Include="lexical\composition\alternative.h" />
@@ -185,6 +187,7 @@
     <ClInclude Include="lexical\composition\sequential_or.h" />
     <ClInclude Include="lexical\lexical.h" />
     <ClInclude Include="lexical\skipper.h" />
+    <ClInclude Include="lexical\subrule.h" />
     <ClInclude Include="lexical\utility\comment.h" />
     <ClInclude Include="lexical\utility\confix.h" />
     <ClInclude Include="lexical\grammar.h" />
@@ -204,6 +207,7 @@
     <ClInclude Include="operand_stack.h" />
     <ClInclude Include="preprocessor\include_guards.h" />
     <ClInclude Include="preprocessor\lex_iterator.h" />
+    <ClInclude Include="preprocessor\pp_defined_grammar.h" />
     <ClInclude Include="syntax_parser.h" />
     <ClInclude Include="syntax_parsers.h" />
     <ClInclude Include="preprocessor\file_position.h" />
@@ -249,6 +253,7 @@
     <ClCompile Include="func.cpp" />
     <ClCompile Include="function_environment.cpp" />
     <ClCompile Include="instructions.cpp" />
+    <ClCompile Include="lexical\utility\primitives.cpp" />
     <ClCompile Include="lexical_analyzer.cpp" />
     <ClCompile Include="local_variable_table.cpp" />
     <ClCompile Include="macro_definition.cpp" />

@@ -47,7 +47,7 @@ namespace compiler
 		colon         = _token_id(0x102, token_category::operator_t), // :
 		semicolon     = _token_id(0x103, token_category::operator_t), // ;
 		question_mark = _token_id(0x104, token_category::operator_t), // ?
-		compl = _token_id(0x105, token_category::operator_t), // ~
+		compl_ = _token_id(0x105, token_category::operator_t),
 		left_brace    = _token_id(0x106, token_category::operator_t), // {
 		right_brace   = _token_id(0x107, token_category::operator_t), // }
 		left_paren    = _token_id(0x108, token_category::operator_t), // (
@@ -66,21 +66,21 @@ namespace compiler
 		less_equal    = _token_id(0x114, token_category::operator_t), // <=
 		not_equal     = _token_id(0x115, token_category::operator_t), // !=
 
-		and           = _token_id(0x120, token_category::operator_t), // & and
+		and_          = _token_id(0x120, token_category::operator_t), // & and
 		bit_and       = _token_id(0x121, token_category::operator_t), // && bitand
 		and_assign    = _token_id(0x123, token_category::operator_t), // &= and_eq
-		or = _token_id(0x124, token_category::operator_t), // | or
+		or_ = _token_id(0x124, token_category::operator_t), // | or
 		bit_or        = _token_id(0x125, token_category::operator_t), // || bitor
 		or_assign     = _token_id(0x126, token_category::operator_t), // |= or_eq
-		xor           = _token_id(0x127, token_category::operator_t), // ^ xor
+		xor_          = _token_id(0x127, token_category::operator_t), // ^ xor
 		xor_assign    = _token_id(0x128, token_category::operator_t), // ^= xor_eq
-		not = _token_id(0x129, token_category::operator_t), // ! not
-		shl           = _token_id(0x12A, token_category::operator_t), // <<
+		not_          = _token_id(0x129, token_category::operator_t), // ! not
+		shl_          = _token_id(0x12A, token_category::operator_t), // <<
 		shl_assign    = _token_id(0x12B, token_category::operator_t), // <<=
-		shr           = _token_id(0x12C, token_category::operator_t), // >>
+		shr_          = _token_id(0x12C, token_category::operator_t), // >>
 		shr_assign    = _token_id(0x12D, token_category::operator_t), // >>=
 
-		div           = _token_id(0x130, token_category::operator_t), // /
+		div_          = _token_id(0x130, token_category::operator_t), // /
 		div_assign    = _token_id(0x131, token_category::operator_t), // /=
 		minus         = _token_id(0x132, token_category::operator_t), // -
 		minus_assign  = _token_id(0x133, token_category::operator_t), // -=

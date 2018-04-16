@@ -20,7 +20,7 @@ namespace compiler::parser
 		auto parse(_Scanner const& scan) const
 		{
 			typedef typename parser_result<self_type, _Scanner>::type result_type;
-			typedef typename parser_scanner_linker<_Scanner> scanner_type;
+			typedef parser_scanner_linker<_Scanner> scanner_type;
 			return parse_context<scanner_type, context_type, result_type>(scan, *this);
 		}
 

@@ -107,7 +107,9 @@ compiler::AST compiler::syntax_analyzer::parse_define_var(const type_representat
 					break;
 				}
 				auto arg_type = parse_pointer(parse_type());
-				string arg_name = next_name_token();
+				string arg_name;
+				if (is_name(peek_token()))
+					arg_name = next_name_token();
 				desc.args.emplace_back(arg_type, arg_name);
 
 				if (peek_token(")"))

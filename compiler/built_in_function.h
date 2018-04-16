@@ -33,6 +33,14 @@ namespace compiler
 		}
 	};
 
+	template<typename R, typename A, typename Cast>
+	struct built_in_function_1_cast : public built_in_function_1<R, Cast>
+	{
+		built_in_function_1_cast(R(*func)(A))
+			: built_in_function_1([](A c) { return func((Cast)c); })
+		{}
+	};
+
 	template<typename A>
 	class built_in_function_1<void, A> : public built_in_function
 	{

@@ -25,6 +25,8 @@ bool compiler::type_pointer::is_assignable_from(type_base_ptr b) const
 				return true;
 		return false;
 	}
+	else if (b->is_integral())
+		return true;
 	else
 		return false;
 }

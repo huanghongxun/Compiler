@@ -3,7 +3,6 @@
 #include <locale>
 #include <stdexcept>
 #include "../parser.h"
-#include "../composition/directives.h"
 
 namespace compiler::parser
 {
@@ -223,10 +222,7 @@ namespace compiler::parser
 
 	any_parser const any_p;
 
-	nothing_parser operator~(any_parser)
-	{
-		return nothing_parser();
-	}
+	nothing_parser operator~(any_parser);
 
 	struct alnum_parser : public test_parser<alnum_parser>
 	{

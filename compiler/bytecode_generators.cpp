@@ -354,6 +354,8 @@ void compiler::bytecode_unary_operator::build(bytecode_appender &appender, AST a
 			flag = build_unary_pointer<short>(ast, desc.op, appender);
 		else if (type_name == type_long->id)
 			flag = build_unary_pointer<long>(ast, desc.op, appender);
+		else if (type_name == type_char->id)
+			flag = build_unary_pointer<char>(ast, desc.op, appender);
 		else if (type_name == type_long_long->id)
 			flag = build_unary_pointer<long long>(ast, desc.op, appender);
 		else if (type_name == type_bool->id)
@@ -402,9 +404,9 @@ void compiler::bytecode_constant::build(bytecode_appender & appender, AST ast)
 	else if (boost::starts_with(desc.value, "'")) // a char
 	{
 		auto chars = parse_constant_string(desc.value.substr(1, desc.value.size() - 2));
-		if (chars.size() != 1)
+		if (chars.size() != 2)
 			appender.get_program()->compilation_error(ast->t, "Char length exceeds 1");
-		appender.append(instruction_ptr(new instruction_constant<int>(chars[0])));
+		appender.append(instruction_ptr(new instruction_constant<char>(chars[0])));
 	}
 	else if (desc.value == "true")
 	{

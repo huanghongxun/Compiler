@@ -3,6 +3,7 @@
 #include "composition.h"
 #include "../utility/primitives.h"
 #include "../parser.h"
+#include "../skipper.h"
 
 namespace compiler::parser
 {

@@ -16,7 +16,7 @@ public:
 
 	void test(const string &code)
 	{
-		program_ptr p = make_shared<program>(code);
+		program_ptr p = make_shared<program>("main.cpp", code);
 		lexical_analyzer analyzer(p);
 		auto tokens = analyzer.analyze();
 		syntax_analyzer syn(p, tokens);

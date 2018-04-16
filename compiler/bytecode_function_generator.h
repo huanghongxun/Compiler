@@ -26,6 +26,7 @@ namespace compiler
 		void build_expression(AST ast);
 		void build_statements(AST ast);
 
+		void find_max_variable_size(AST ast);
 		func_ptr build(AST ast);
 
 		size_t get_constant_string_pool_ptr() override;

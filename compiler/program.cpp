@@ -9,21 +9,22 @@
 #include <boost/algorithm/string.hpp>
 using namespace std;
 
-compiler::program::program(const string &code) : code(code) {
+compiler::program::program(const string &file, const string &code) : file(file), code(code) {
 }
 
 const string compiler::program::get_code() const
 {
-    return code;
+	return code;
 }
 
-compiler::program::program(initializer_list<string> args) : program(boost::join(vector<string>(args), "\n"))
+const string compiler::program::get_file() const
 {
+	return file;
 }
 
 void compiler::program::compilation_error_impl(int line_number, int line_column, const char *fmt, ...)
 {
-	fprintf(stderr, "main.c<%d:%d>: ", line_number, line_column);
+	fprintf(stderr, "%s<%d:%d>: ", file.c_str(), line_number, line_column);
 	va_list vl;
 	va_start(vl, fmt);
 	vfprintf(stderr, fmt, vl);

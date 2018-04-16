@@ -1,6 +1,7 @@
 #pragma once
 
 #include <locale>
+#include "scanner.h"
 
 namespace compiler::parser
 {

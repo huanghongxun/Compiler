@@ -45,6 +45,51 @@ void compiler::bytecode_function_generator::build_expression(AST ast)
 	}
 }
 
+void compiler::bytecode_function_generator::find_max_variable_size(AST ast)
+{
+	assert_eq(ast->desc.type(), typeid(descriptor_statements));
+
+	variables.emplace_back(variables.back().ptr);
+
+	for (auto &i : ast->children)
+	{
+		if (i->desc.type() == typeid(descriptor_statements))
+			find_max_variable_size(i);
+		else if (i->desc.type() == typeid(descriptor_define_local_variables))
+		{
+			auto local_desc = any_cast<descriptor_define_local_variables>(i->desc);
+			for (auto &j : i->children)
+			{
+				auto desc = any_cast<descriptor_define_variable>(j->desc);
+				auto &layer = variables.back();
+
+				// create a new variable
+				// do not create static variables in function.
+				if (!desc.type.is_static)
+				{
+					desc.ptr = layer.ptr;
+					j->desc = desc;
+
+					size_t sz = desc.type.base_type->size();
+					for (auto &t : desc.dim)
+					{
+						assert_eq(t->desc.type(), typeid(descriptor_constant));
+						sz *= boost::lexical_cast<size_t>(any_cast<descriptor_constant>(t->desc).value);
+					}
+
+					layer.ptr += sz;
+					max_variable_size = max(max_variable_size, layer.ptr);
+				}
+
+				// register variable whatever static or non-static variables.
+				layer.variables[desc.name] ={ desc.ptr, desc.type };
+			}
+		}
+	}
+
+	variables.pop_back();
+}
+
 void compiler::bytecode_function_generator::build_statements(AST ast)
 {
 	assert_eq(ast->desc.type(), typeid(descriptor_statements));
@@ -162,6 +207,9 @@ func_ptr compiler::bytecode_function_generator::build(AST ast)
 
 	variables.emplace_back(0);
 
+	find_max_variable_size(ast->children[0]);
+	f->local_size = variables.back().ptr = max_variable_size;
+
 	auto &indexes = f->get_arg_indexes();
 	for (auto &i : desc.args)
 	{
@@ -172,12 +220,12 @@ func_ptr compiler::bytecode_function_generator::build(AST ast)
 		layer.ptr += i.first.base_type->size();
 	}
 
+	variables.back().ptr = 0;
+
 	build_statements(ast->children[0]);
 
 	if (f->return_type.base_type->is_void())
 		append(instruction_ptr(new instruction_return()));
-
-	f->local_size = max_variable_size;
 
 	variables.pop_back();
 	return f;

@@ -8,6 +8,8 @@
 #include "scanner.h"
 #include "skipper.h"
 
+#include "actor/actors.h"
+
 #include "composition/composition.h"
 #include "composition/action.h"
 #include "composition/directives.h"

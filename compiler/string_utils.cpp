@@ -151,7 +151,10 @@ vector<char> parse_constant_string(string pattern)
 			}
 			else
 				throw invalid_argument(string_format("Unknown escape \\%c", next));
+
 		}
+		else
+			chars.push_back(*it);
 	}
 	chars.push_back(0);
 	return chars;
