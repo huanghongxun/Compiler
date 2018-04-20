@@ -8,16 +8,46 @@
 
 void compiler::virtual_machine::init_built_in_func()
 {
+	// assert.h
 	built_in_func["assert"] = shared_ptr<built_in_function>(new built_in_assert());
-	built_in_func["putchar"] = shared_ptr<built_in_function>(new built_in_function_1<int, int>(putchar));
-	built_in_func["malloc"] = shared_ptr<built_in_function>(new built_in_function_1<void*, size_t>(malloc));
-	built_in_func["free"] = shared_ptr<built_in_function>(new built_in_function_1<void, void*>(free));
-	built_in_func["memset"] = shared_ptr<built_in_function>(new built_in_function_3<void*, void*, int, size_t>(memset));
-	built_in_func["memcpy"] = shared_ptr<built_in_function>(new built_in_function_3<void*, void*, void const*, size_t>(memcpy));
-	built_in_func["strcmp"] = shared_ptr<built_in_function>(new built_in_function_2<int, const char*, const char*>(strcmp));
-	built_in_func["strlen"] = shared_ptr<built_in_function>(new built_in_function_1<size_t, const char*>(strlen));
-	built_in_func["puts"] = shared_ptr<built_in_function>(new built_in_function_1<int, const char*>(puts));
-	built_in_func["system"] = shared_ptr<built_in_function>(new built_in_function_1<int, const char*>(system));
+
+	// string.h
+	built_in_func["memset"] = create_function(memset);
+	built_in_func["memcpy"] = create_function(memcpy);
+	built_in_func["strcmp"] = create_function(strcmp);
+	built_in_func["strlen"] = create_function(strlen);
+	built_in_func["strcat"] = create_function(strcat);
+	built_in_func["strchr"] = create_function<char*, char*, int>(strchr);
+	built_in_func["strrchr"] = create_function<char*, char*, int>(strrchr);
+	built_in_func["strcoll"] = create_function(strcoll);
+	built_in_func["strcpy"] = create_function(strcpy);
+	built_in_func["strdup"] = create_function(strtok);
+	built_in_func["strstr"] = create_function<char*, char*, const char*>(strstr);
+
+	// ctype.h
+	built_in_func["isalnum"] = create_function(isalnum);
+	built_in_func["isalpha"] = create_function(isalpha);
+	built_in_func["islower"] = create_function(islower);
+	built_in_func["isupper"] = create_function(isupper);
+	built_in_func["isdigit"] = create_function(isdigit);
+	built_in_func["isxdigit"] = create_function(isxdigit);
+	built_in_func["iscntrl"] = create_function(iscntrl);
+	built_in_func["isgraph"] = create_function(isgraph);
+	built_in_func["isspace"] = create_function(isspace);
+	built_in_func["isblank"] = create_function(isblank);
+	built_in_func["isprint"] = create_function(isprint);
+	built_in_func["ispunct"] = create_function(ispunct);
+	built_in_func["tolower"] = create_function(tolower);
+	built_in_func["toupper"] = create_function(toupper);
+
+	// stdlib.h
+	built_in_func["malloc"] = create_function(malloc);
+	built_in_func["free"] = create_function(free);
+	built_in_func["system"] = create_function(system);
+
+	// stdio.h
+	built_in_func["putchar"] = create_function(putchar);
+	built_in_func["puts"] = create_function(puts);
 	built_in_func["printf"] = shared_ptr<built_in_function>(new built_in_printf());
 	built_in_func["scanf"] = shared_ptr<built_in_function>(new built_in_scanf());
 }

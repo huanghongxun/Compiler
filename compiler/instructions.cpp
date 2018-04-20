@@ -78,7 +78,7 @@ instruction_ptr get_instruction(compiler::type_base_ptr type, int index, bool is
 			return instruction_ptr(new instruction_load<short>(index, is_static));
 		else if (type == type_long)
 			return instruction_ptr(new instruction_load<long>(index, is_static));
-		else if (type == type_long_long)
+		else if (type == type_int64)
 			return instruction_ptr(new instruction_load<long long>(index, is_static));
 		else if (type == type_float)
 			return instruction_ptr(new instruction_load<float>(index, is_static));

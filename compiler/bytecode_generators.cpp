@@ -93,7 +93,7 @@ void compiler::bytecode_assign::build(bytecode_appender & appender, AST ast)
 			flag = build_assign_integral<short>(desc.op, appender);
 		else if (type_name == type_long->id)
 			flag = build_assign_integral<long>(desc.op, appender);
-		else if (type_name == type_long_long->id)
+		else if (type_name == type_int64->id)
 			flag = build_assign_integral<long long>(desc.op, appender);
 		else if (type_name == type_float->id)
 			flag = build_assign_common<float>(desc.op, appender);
@@ -226,7 +226,7 @@ void compiler::bytecode_binary_operator::build(bytecode_appender &appender, AST 
 				flag = build_binary_integral<short>(desc.op, appender);
 			else if (type_name == type_long->id)
 				flag = build_binary_integral<long>(desc.op, appender);
-			else if (type_name == type_long_long->id)
+			else if (type_name == type_int64->id)
 				flag = build_binary_integral<long long>(desc.op, appender);
 			else if (type_name == type_float->id)
 				flag = build_binary_common<float>(desc.op, appender);
@@ -333,7 +333,7 @@ void compiler::bytecode_unary_operator::build(bytecode_appender &appender, AST a
 		flag = build_unary_integral<short>(ast, desc.op, appender);
 	else if (type_name == type_long->id)
 		flag = build_unary_integral<long>(ast, desc.op, appender);
-	else if (type_name == type_long_long->id)
+	else if (type_name == type_int64->id)
 		flag = build_unary_integral<long long>(ast, desc.op, appender);
 	else if (type_name == type_bool->id)
 		flag = build_unary_bool(ast, desc.op, appender);
@@ -356,7 +356,7 @@ void compiler::bytecode_unary_operator::build(bytecode_appender &appender, AST a
 			flag = build_unary_pointer<long>(ast, desc.op, appender);
 		else if (type_name == type_char->id)
 			flag = build_unary_pointer<char>(ast, desc.op, appender);
-		else if (type_name == type_long_long->id)
+		else if (type_name == type_int64->id)
 			flag = build_unary_pointer<long long>(ast, desc.op, appender);
 		else if (type_name == type_bool->id)
 			flag = build_unary_pointer<long long>(ast, desc.op, appender);
@@ -561,7 +561,7 @@ void build_inc(bytecode_appender & appender, const string &type_name, int delta)
 		appender.append(instruction_ptr(new instruction_inc<short>(delta)));
 	else if (type_name == type_long->id)
 		appender.append(instruction_ptr(new instruction_inc<long>(delta)));
-	else if (type_name == type_long_long->id)
+	else if (type_name == type_int64->id)
 		appender.append(instruction_ptr(new instruction_inc<long long>(delta)));
 	else
 		assert_cond(0);

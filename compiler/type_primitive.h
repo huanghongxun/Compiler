@@ -27,13 +27,18 @@ namespace compiler
 	};
 
 	extern type_base_ptr type_int;
+	extern type_base_ptr type_uint;
 	extern type_base_ptr type_float;
 	extern type_base_ptr type_double;
 	extern type_base_ptr type_long_double;
 	extern type_base_ptr type_long;
-	extern type_base_ptr type_long_long;
+	extern type_base_ptr type_ulong;
+	extern type_base_ptr type_int64;
+	extern type_base_ptr type_uint64;
 	extern type_base_ptr type_bool;
 	extern type_base_ptr type_char;
+	extern type_base_ptr type_byte;
 	extern type_base_ptr type_short;
+	extern type_base_ptr type_ushort;
 	extern type_base_ptr type_void;
 }

@@ -1,25 +1,104 @@
 #pragma once
 
 #include "parser.h"
+#include "scanner.h"
+#include <type_traits>
 
 namespace compiler::parser
 {
-	template<int id, typename _Context>
-	struct subrule : public parser<subrule<id, _Context>>
+	using namespace std;
+
+	template<typename _First, typename _Rest>
+	struct subrule_list;
+
+	template<int ID, typename _Defintion, typename _Context>
+	struct subrule_parser;
+
+	template<int ID, typename _List>
+	struct get_subrule
 	{
-		typedef subrule<id, _Context> self_type;
+		typedef typename get_subrule<ID, typename _List::rest_type>::type type;
+	};
+
+	template<int ID, typename _Definition, typename _Context, typename _Rest>
+	struct get_subrule<ID, subrule_list<subrule_parser<ID, _Definition, _Context>, _Rest>>
+	{
+		typedef _Definition type;
+	};
+
+	template<int ID>
+	struct get_subrule<ID, nil_t>
+	{
+		typedef nil_t type;
+	};
+
+	template<int ID, typename _Result, typename _Scanner>
+	struct parse_subrule
+	{
+		template<typename _List>
+		static void parse(_Result& res, _Scanner const& scan, _List const& list, true_type)
+		{
+			res = list.first.that.parse(scan);
+		}
+
+		template<typename _List>
+		static void parse(_Result& res, _Scanner const& scan, _List const& list, false_type)
+		{
+			typedef typename _List::rest_type::first_type subrule_type;
+			parse(res, scan, list.rest, conditional_t<subrule_type::id == ID, true_type, false_type>());
+		}
+
+		static void parse(_Result& res, _Scanner const& scan)
+		{
+			typedef typename _Scanner::list_type::first_type subrule_type;
+			parse(res, scan, scan.list, conditional_t<subrule_type::id == ID, true_type, false_type>());
+		}
+
+
+	};
+
+	template<int ID, typename _Context>
+	struct subrule : public parser<subrule<ID, _Context>>
+	{
+		typedef subrule<ID, _Context> self_type;
 		typedef typename _Context::context_linker_type context_type;
 		typedef typename _Context::attribute_type attribute_type;
 
+		static int id = ID;
+
 		template<typename _Scanner>
-		using result =;
+		using result = typename parser_result<typename get_subrule<ID, typename _Scanner::list_type>, _Scanner>::type;
 
 		template<typename _Scanner>
 		typename parser_result<self_type, _Scanner>::type
 			parse_main(_Scanner const& scan) const
 		{
-
+			typedef typename parser_result<self_type, _Scanner>::type result_type;
+			result_type res;
+			parse_subrule<ID, result_type, _Scanner>::parse(res, scan);
+			return res;
 		}
+
+		template<typename _Scanner>
+		typename parser_result<self_type, _Scanner>::type
+			parse(_Scanner const& scan) const
+		{
+			typedef typename parser_result<self_type, _Scanner>::type result_type;
+			typedef typename parser_scanner_linker<_Scanner> scanner_type;
+			return parse_context<scanner_type, context_type, result_type>(scan, *this);
+		}
+
+		template<typename _Definition>
+		subrule_parser<ID, _Definition, _Context>
+			operator=(parser<_Definition> const& that) const
+		{
+			return subrule_parser<ID, _Definition, _Context>(*this, that.actual());
+		}
+
+		subrule& operator=(subrule const&) = delete;
+
+		template<int ID2, typename _Context2>
+		subrule& operator=(subrule<ID2, _Context2> const&) = delete;
 	};
 
 	template <typename _Scanner, typename _List>
@@ -38,6 +117,7 @@ namespace compiler::parser
 	struct subrules_scanner : public _Scanner
 	{
 		typedef subrules_scanner<_Scanner, _List> self_type;
+		typedef _List list_type;
 
 		subrules_scanner(_Scanner const& scan, _List const& list)
 			: _Scanner(scan), list(list) {}
@@ -57,12 +137,15 @@ namespace compiler::parser
 			return subrules_scanner<typename rebind_scanner_policies<_Scanner, _Policies2>::type, _List>(scan.change_policies<_Policies2>(), list);
 		}
 
+		_List const& list;
 	};
 
 	template <typename _First, typename _Rest>
 	struct subrule_list : public parser<subrule_list<_First, _Rest>>
 	{
 		typedef subrule_list<_First, _Rest> self_type;
+		typedef _First first_type;
+		typedef _Rest rest_type;
 
 		subrule_list(_First const& first, _Rest const& rest)
 			: first(first), rest(rest) {}

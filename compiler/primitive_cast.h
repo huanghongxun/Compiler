@@ -23,7 +23,7 @@ namespace compiler
 			return instruction_ptr(new instruction_primitive_cast<long double, T>());
 		else if (from == type_long->id)
 			return instruction_ptr(new instruction_primitive_cast<long, T>());
-		else if (from == type_long_long->id)
+		else if (from == type_int64->id)
 			return instruction_ptr(new instruction_primitive_cast<long long, T>());
 		else if (from == type_bool->id)
 			return instruction_ptr(new instruction_primitive_cast<bool, T>());
@@ -31,6 +31,16 @@ namespace compiler
 			return instruction_ptr(new instruction_primitive_cast<char, T>());
 		else if (from == type_short->id)
 			return instruction_ptr(new instruction_primitive_cast<short, T>());
+		else if (from == type_ushort->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned short, T>());
+		else if (from == type_byte->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned char, T>());
+		else if (from == type_ulong->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned long, T>());
+		else if (from == type_uint64->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned long long, T>());
+		else if (from == type_uint->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned int, T>());
 		else
 			throw std::runtime_error(string_format("primitive cast does not support type %s", from.c_str()));
 	}

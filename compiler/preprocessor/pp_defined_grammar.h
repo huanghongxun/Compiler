@@ -9,7 +9,7 @@ namespace compiler::preprocessor
 	using namespace compiler::parser;
 
 	template <typename _Container>
-	struct pp_defined_grammar : public grammar<pp_defined_grammar>
+	struct pp_defined_grammar : public grammar<pp_defined_grammar<_Container>>
 	{
 		template <typename _Scanner>
 		struct definition

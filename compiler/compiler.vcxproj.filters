@@ -288,6 +288,9 @@
     <ClInclude Include="lexical\actor\actors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="lexical\dynamic\if_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-
+#include <boost/wave/grammars/cpp_chlit_grammar.hpp>
 #include "parser.h"
 #include "nil_t.h"
 

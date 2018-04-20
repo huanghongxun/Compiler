@@ -129,7 +129,7 @@ object_t cast_primitive0(object_t obj, type_base_ptr from_type)
 		return (T)obj.cast<long double>();
 	else if (from == type_long->id)
 		return (T)obj.cast<long>();
-	else if (from == type_long_long->id)
+	else if (from == type_int64->id)
 		return (T)obj.cast<long long>();
 	else if (from == type_bool->id)
 		return (T)obj.cast<bool>();
@@ -154,7 +154,7 @@ object_t cast_primitive(object_t from, type_base_ptr from_type, type_base_ptr to
 		return cast_primitive0<long double>(from, from_type);
 	else if (to == type_long->id)
 		return cast_primitive0<long>(from, from_type);
-	else if (to == type_long_long->id)
+	else if (to == type_int64->id)
 		return cast_primitive0<long long>(from, from_type);
 	else if (to == type_bool->id)
 		return cast_primitive0<bool>(from, from_type);
@@ -188,7 +188,7 @@ object_t compiler::evaulate_expression(AST ast)
 			res = eval_binary_integral<short>(desc.op, lhs, rhs);
 		else if (type_name == type_long->id)
 			res = eval_binary_integral<long>(desc.op, lhs, rhs);
-		else if (type_name == type_long_long->id)
+		else if (type_name == type_int64->id)
 			res = eval_binary_integral<long long>(desc.op, lhs, rhs);
 		else if (type_name == type_float->id)
 			res = eval_binary_common<float>(desc.op, lhs, rhs);
@@ -221,7 +221,7 @@ object_t compiler::evaulate_expression(AST ast)
 			res = build_unary_integral<short>(desc.op, val);
 		else if (type_name == type_long->id)
 			res = build_unary_integral<long>(desc.op, val);
-		else if (type_name == type_long_long->id)
+		else if (type_name == type_int64->id)
 			res = build_unary_integral<long long>(desc.op, val);
 		else if (type_name == type_bool->id)
 			res = build_unary_bool(desc.op, val);

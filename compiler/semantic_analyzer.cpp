@@ -389,7 +389,7 @@ compiler::type_representation compiler::semantic_analyzer::deduce_type(AST ast)
 			else if (desc.value.find(".") == string::npos)
 			{
 				if (boost::ends_with(desc.value, "ll"))
-					return ast->type = type_long_long;
+					return ast->type = type_int64;
 				else if (boost::ends_with(desc.value, "l"))
 					return ast->type = type_long;
 				else

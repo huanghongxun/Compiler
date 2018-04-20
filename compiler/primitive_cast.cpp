@@ -13,7 +13,7 @@ compiler::instruction_ptr compiler::cast_primitive(type_base_ptr from_type, type
 		return cast_primitive0<long double>(from_type);
 	else if (to == type_long->id)
 		return cast_primitive0<long>(from_type);
-	else if (to == type_long_long->id)
+	else if (to == type_int64->id)
 		return cast_primitive0<long long>(from_type);
 	else if (to == type_bool->id)
 		return cast_primitive0<bool>(from_type);
@@ -21,6 +21,16 @@ compiler::instruction_ptr compiler::cast_primitive(type_base_ptr from_type, type
 		return cast_primitive0<char>(from_type);
 	else if (to == type_short->id)
 		return cast_primitive0<short>(from_type);
+	else if (to == type_byte->id)
+		return cast_primitive0<unsigned char>(from_type);
+	else if (to == type_ushort->id)
+		return cast_primitive0<unsigned short>(from_type);
+	else if (to == type_uint->id)
+		return cast_primitive0<unsigned int>(from_type);
+	else if (to == type_ulong->id)
+		return cast_primitive0<unsigned long>(from_type);
+	else if (to == type_uint64->id)
+		return cast_primitive0<unsigned long long>(from_type);
 	else if (to_type->is_pointer())
 	{
 		if (from_type->is_integral())
@@ -42,7 +52,7 @@ namespace compiler
 			return instruction_ptr(new instruction_primitive_cast<int, void*>());
 		else if (from == type_long->id)
 			return instruction_ptr(new instruction_primitive_cast<long, void*>());
-		else if (from == type_long_long->id)
+		else if (from == type_int64->id)
 			return instruction_ptr(new instruction_primitive_cast<long long, void*>());
 		else if (from == type_bool->id)
 			return instruction_ptr(new instruction_primitive_cast<bool, void*>());
@@ -50,6 +60,16 @@ namespace compiler
 			return instruction_ptr(new instruction_primitive_cast<char, void*>());
 		else if (from == type_short->id)
 			return instruction_ptr(new instruction_primitive_cast<short, void*>());
+		else if (from == type_byte->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned char, void*>());
+		else if (from == type_ushort->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned short, void*>());
+		else if (from == type_uint->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned int, void*>());
+		else if (from == type_ulong->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned long, void*>());
+		else if (from == type_uint64->id)
+			return instruction_ptr(new instruction_primitive_cast<unsigned long long, void*>());
 		else
 			throw std::runtime_error(string_format("primitive cast does not support type %s", from.c_str()));
 	}

@@ -33,6 +33,12 @@ namespace compiler
 		}
 	};
 
+	template<typename R, typename A>
+	shared_ptr<built_in_function> create_function(R(*func)(A))
+	{
+		return shared_ptr<built_in_function>(new built_in_function_1<R, A>(func));
+	}
+
 	template<typename R, typename A, typename Cast>
 	struct built_in_function_1_cast : public built_in_function_1<R, Cast>
 	{
@@ -90,6 +96,12 @@ namespace compiler
 		}
 	};
 
+	template<typename R, typename A, typename B>
+	shared_ptr<built_in_function> create_function(R(*func)(A, B))
+	{
+		return shared_ptr<built_in_function>(new built_in_function_2<R, A, B>(func));
+	}
+
 	template<typename A, typename B>
 	class built_in_function_2<void, A, B> : public built_in_function
 	{
@@ -138,6 +150,12 @@ namespace compiler
 				return func(a.cast<A>(), b.cast<B>(), c.cast<C>());
 		}
 	};
+
+	template<typename R, typename A, typename B, typename C>
+	shared_ptr<built_in_function> create_function(R(*func)(A, B, C))
+	{
+		return shared_ptr<built_in_function>(new built_in_function_3<R, A, B, C>(func));
+	}
 
 	template<typename R, typename A, typename B, typename C, typename D>
 	class built_in_function_4 : public built_in_function

@@ -185,6 +185,7 @@
     <ClInclude Include="lexical\composition\sequence.h" />
     <ClInclude Include="lexical\composition\sequential_and.h" />
     <ClInclude Include="lexical\composition\sequential_or.h" />
+    <ClInclude Include="lexical\dynamic\if_parser.h" />
     <ClInclude Include="lexical\lexical.h" />
     <ClInclude Include="lexical\skipper.h" />
     <ClInclude Include="lexical\subrule.h" />
